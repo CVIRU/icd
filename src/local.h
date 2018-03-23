@@ -49,7 +49,7 @@ extern "C" {
 #endif
 
 #ifdef HAVE_RCPPEIGEN_H
-// #define ICD_EIGEN
+#define ICD_EIGEN
 #endif
 
 #ifdef ICD_EIGEN

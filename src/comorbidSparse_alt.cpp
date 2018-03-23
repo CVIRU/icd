@@ -26,6 +26,7 @@ using namespace Rcpp;
 // https://eigen.tuxfamily.org/dox/group__TutorialSparse.html
 typedef Eigen::Triplet<char> Triplet;
 typedef Eigen::SparseMatrix<char, Eigen::RowMajor> PtsSparse;
+
 //' comorbidity search with sparse matrix result
 //'
 //' Much less memory competition in writing output. As an example the Vermont
@@ -59,7 +60,10 @@ Eigen::SparseMatrix<char, Eigen::RowMajor> lookupComorbid_alt_Sparse(const VecVe
   return out;
   }
 
-Eigen::SparseMatrix<char, Eigen::RowMajor> lookupComorbid_alt_SparseOmp(const VecVecInt& vcdb, const VecVecInt& map) {
+// [[Rcpp::export]]
+Eigen::SparseMatrix<char, Eigen::RowMajor>
+  lookupComorbid_alt_SparseOmp(const VecVecInt& vcdb, const VecVecInt& map) {
+
   const VecVecIntSz num_comorbid = map.size();
   VecInt::const_iterator code_it;
   std::vector<Triplet> vecTrip;
@@ -160,9 +164,9 @@ T my_len( const T& x){
 //' @keywords internal
 // [[Rcpp::export]]
 SEXP icd9Comorbid_alt_MatMul(const SEXP& icd9df, const Rcpp::List& icd9Mapping,
-                        const std::string visitId, const std::string icd9Field,
-                        const int threads = 8, const int chunk_size = 256,
-                        const int omp_chunk_size = 1, bool aggregate = true) {
+                             const std::string visitId, const std::string icd9Field,
+                             const int threads = 8, const int chunk_size = 256,
+                             const int omp_chunk_size = 1, bool aggregate = true) {
 
   // find size of final map matrix:
   size_t map_rows = 0;

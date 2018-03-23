@@ -47,5 +47,6 @@ Copyright: See file (inst/)COPYRIGHTS
 VignetteBuilder: knitr
 LinkingTo:
     Rcpp,
+    RcppEigen,
     testthat
 RoxygenNote: 6.0.1

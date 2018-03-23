@@ -99,8 +99,16 @@ CPPFLAGS="$CPPFLAGS -I$R_INCLUDE_DIR -I -I$TESTTHAT_INCLUDE_DIR -I$RCPPEIGEN_INC
 AC_CHECK_HEADERS([testthat.h])
 AC_CHECK_HEADERS([RcppEigen.h])
 
+NO_CLANG_PRAGMA_WARNING=''
+if test "x$ac_cv_header_RcppEigen_h" = xyes; then :
+  AX_CHECK_COMPILE_FLAG([-Wno-unknown-pragmas],
+                         [NO_CLANG_PRAGMA_WARNING='-Wno-unknown-pragmas'])
+fi
+
 AC_LANG_POP([C++])
 # end testthat and RcppEigen tests
+
+AC_SUBST(NO_CLANG_PRAGMA_WARNING)
 
 # TODO: if a debug flag is set, then update .Rbuildignore to NOT exclude _alt.cpp etc files
 
