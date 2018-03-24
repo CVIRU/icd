@@ -125,26 +125,6 @@ icd10_comorbid_parent_search_cpp <- function(x, map, visit_name, icd_name) {
     .Call(`_icd_icd10_comorbid_parent_search_cpp`, x, map, visit_name, icd_name)
 }
 
-#' comorbidity search with sparse matrix result
-#'
-#' Much less memory competition in writing output. As an example the Vermont
-#' data has 29,000 comorbidity flags (29 for each patient) Whereas only 2367
-#' AHRQ comorbidity are positive, so under 10%.
-#' @keywords internal
-lookupComorbid_alt_Sparse <- function(vcdb, map) {
-    .Call(`_icd_lookupComorbid_alt_Sparse`, vcdb, map)
-}
-
-lookupComorbid_alt_SparseOmp <- function(vcdb, map) {
-    .Call(`_icd_lookupComorbid_alt_SparseOmp`, vcdb, map)
-}
-
-#' @describeIn icd9Comorbid_alt_Taskloop Sparse comorbidity results with Eigen
-#' @keywords internal
-icd9Comorbid_alt_Sparse <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
-    .Call(`_icd_icd9Comorbid_alt_Sparse`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
-}
-
 #' @title prototype to do entire comorbidity calculation as a matrix multiplication
 #' @description
 #' The problem is that the matrices could be huge: the patient-icd matrix would
@@ -170,13 +150,33 @@ icd9Comorbid_alt_Sparse <- function(icd9df, icd9Mapping, visitId, icd9Field, thr
 #' sapply(icd::icd9_map_ahrq, length) %>% sum
 #' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
 #' \dontrun{
-#' # remove _alt line in .Rbuildignore, then these will be available
+#' # remove _alt line in .Rbuildignore, then these will be available. Also, re-enable [[Rcpp::depends(RcppEigen)]]
 #' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidMatMul)
 #' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidSparseOmp)
 #' }
 #' @keywords internal
 icd9Comorbid_alt_MatMul <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
     .Call(`_icd_icd9Comorbid_alt_MatMul`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
+}
+
+#' comorbidity search with sparse matrix result
+#'
+#' Much less memory competition in writing output. As an example the Vermont
+#' data has 29,000 comorbidity flags (29 for each patient) Whereas only 2367
+#' AHRQ comorbidity are positive, so under 10%.
+#' @keywords internal
+lookupComorbid_alt_Sparse <- function(vcdb, map) {
+    .Call(`_icd_lookupComorbid_alt_Sparse`, vcdb, map)
+}
+
+lookupComorbid_alt_SparseOmp <- function(vcdb, map) {
+    .Call(`_icd_lookupComorbid_alt_SparseOmp`, vcdb, map)
+}
+
+#' @describeIn icd9Comorbid_alt_Taskloop Sparse comorbidity results with Eigen
+#' @keywords internal
+icd9Comorbid_alt_Sparse <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
+    .Call(`_icd_icd9Comorbid_alt_Sparse`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
 }
 
 #' @describeIn icd9Comorbid_alt_Taskloop Sparse comorbidity results with Eigen
