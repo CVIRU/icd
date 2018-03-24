@@ -173,8 +173,6 @@ lookupComorbid_alt_SparseOmp <- function(vcdb, map) {
     .Call(`_icd_lookupComorbid_alt_SparseOmp`, vcdb, map)
 }
 
-#' @describeIn icd9Comorbid_alt_Taskloop Sparse comorbidity results with Eigen
-#' @keywords internal
 icd9Comorbid_alt_Sparse <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
     .Call(`_icd_icd9Comorbid_alt_Sparse`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
 }

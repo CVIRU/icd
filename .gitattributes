@@ -2,5 +2,7 @@
 * text=auto
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
+
+# git config diff.nodiff.command /bin/true
 *RcppExports* diff=nodiff
 

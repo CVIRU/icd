@@ -624,7 +624,6 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
-NO_CLANG_PRAGMA_WARNING
 CXXCPP
 OPENMP_CFLAGS_IN_PKG
 OPENMP_CFLAGS
@@ -2265,11 +2264,13 @@ if test -z "${R_HOME}"; then
 fi
 R_BIN="${R_HOME}/bin/R"
 CC=`"${R_BIN}" CMD config CC`
-CXX=`"${R_BIN}" CMD config CXX`
+CXX11=`"${R_HOME}/bin/R" CMD config CXX11`
+CXX11STD=`"${R_HOME}/bin/R" CMD config CXX11STD`
+CXX="${CXX11} ${CXX11STD}"
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX11FLAGS`
 CPP=`"${R_BIN}" CMD config CPP`
 CFLAGS=`"${R_BIN}" CMD config CFLAGS`
 CPPFLAGS=`"${R_BIN}" CMD config CPPFLAGS`
-CXXFLAGS=`"${R_BIN}" CMD config CXXFLAGS`
 LIBS="${PKG_LIBS}"
 
 ac_ext=c
@@ -4713,44 +4714,11 @@ fi
 done
 
 
-NO_CLANG_PRAGMA_WARNING=''
-if test "x$ac_cv_header_RcppEigen_h" = xyes; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -Wno-unknown-pragmas" >&5
-$as_echo_n "checking whether C++ compiler accepts -Wno-unknown-pragmas... " >&6; }
-if ${ax_cv_check_cxxflags___Wno_unknown_pragmas+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-  ax_check_save_flags=$CXXFLAGS
-  CXXFLAGS="$CXXFLAGS  -Wno-unknown-pragmas"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ax_cv_check_cxxflags___Wno_unknown_pragmas=yes
-else
-  ax_cv_check_cxxflags___Wno_unknown_pragmas=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  CXXFLAGS=$ax_check_save_flags
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cxxflags___Wno_unknown_pragmas" >&5
-$as_echo "$ax_cv_check_cxxflags___Wno_unknown_pragmas" >&6; }
-if test "x$ax_cv_check_cxxflags___Wno_unknown_pragmas" = xyes; then :
-  NO_CLANG_PRAGMA_WARNING='-Wno-unknown-pragmas'
-else
-  :
-fi
-
-fi
+#NO_CLANG_PRAGMA_WARNING=''
+#if test "x$ac_cv_header_RcppEigen_h" = xyes; then :
+#  AX_CHECK_COMPILE_FLAG([-Wno-unknown-pragmas],
+#                         [NO_CLANG_PRAGMA_WARNING='-Wno-unknown-pragmas'])
+#fi
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -4760,7 +4728,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 # end testthat and RcppEigen tests
 
-
+# AC_SUBST(NO_CLANG_PRAGMA_WARNING)
 
 # TODO: if a debug flag is set, then update .Rbuildignore to NOT exclude _alt.cpp etc files
 

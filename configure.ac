@@ -31,11 +31,13 @@ if test -z "${R_HOME}"; then
 fi
 R_BIN="${R_HOME}/bin/R"
 CC=`"${R_BIN}" CMD config CC`
-CXX=`"${R_BIN}" CMD config CXX`
+CXX11=`"${R_HOME}/bin/R" CMD config CXX11`
+CXX11STD=`"${R_HOME}/bin/R" CMD config CXX11STD`
+CXX="${CXX11} ${CXX11STD}"
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXX11FLAGS`
 CPP=`"${R_BIN}" CMD config CPP`
 CFLAGS=`"${R_BIN}" CMD config CFLAGS`
 CPPFLAGS=`"${R_BIN}" CMD config CPPFLAGS`
-CXXFLAGS=`"${R_BIN}" CMD config CXXFLAGS`
 LIBS="${PKG_LIBS}"
 
 AC_CHECK_HEADER([string.h])
@@ -99,16 +101,16 @@ CPPFLAGS="$CPPFLAGS -I$R_INCLUDE_DIR -I -I$TESTTHAT_INCLUDE_DIR -I$RCPPEIGEN_INC
 AC_CHECK_HEADERS([testthat.h])
 AC_CHECK_HEADERS([RcppEigen.h])
 
-NO_CLANG_PRAGMA_WARNING=''
-if test "x$ac_cv_header_RcppEigen_h" = xyes; then :
-  AX_CHECK_COMPILE_FLAG([-Wno-unknown-pragmas],
-                         [NO_CLANG_PRAGMA_WARNING='-Wno-unknown-pragmas'])
-fi
+#NO_CLANG_PRAGMA_WARNING=''
+#if test "x$ac_cv_header_RcppEigen_h" = xyes; then :
+#  AX_CHECK_COMPILE_FLAG([-Wno-unknown-pragmas],
+#                         [NO_CLANG_PRAGMA_WARNING='-Wno-unknown-pragmas'])
+#fi
 
 AC_LANG_POP([C++])
 # end testthat and RcppEigen tests
 
-AC_SUBST(NO_CLANG_PRAGMA_WARNING)
+# AC_SUBST(NO_CLANG_PRAGMA_WARNING)
 
 # TODO: if a debug flag is set, then update .Rbuildignore to NOT exclude _alt.cpp etc files
 

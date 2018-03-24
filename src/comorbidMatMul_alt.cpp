@@ -11,6 +11,9 @@
 #include "local.h"                     // for ICD_OPENMP
 #include "config.h"                     // for valgrind, CXX11 etc
 #include "util.h"                     // for debug_parallel
+extern "C" {
+#include "cutil.h"                              // for getRListOrDfElement
+}
 
 using namespace Rcpp;
 

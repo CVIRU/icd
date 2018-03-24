@@ -14,6 +14,9 @@
 #include "local.h"                     // for ICD_OPENMP
 #include "config.h"                     // for valgrind, CXX11 etc
 #include "util.h"                     // for debug_parallel
+extern "C" {
+#include "cutil.h"                              // for getRListOrDfElement
+}
 
 using namespace Rcpp;
 
@@ -90,8 +93,8 @@ Eigen::SparseMatrix<char, Eigen::RowMajor>
   return out;
 }
 
-//' @describeIn icd9Comorbid_alt_Taskloop Sparse comorbidity results with Eigen
-//' @keywords internal
+// @describeIn icd9Comorbid_alt_Taskloop Sparse comorbidity results with Eigen
+// @keywords internal
 // [[Rcpp::export]]
 SEXP icd9Comorbid_alt_Sparse(const SEXP& icd9df, const Rcpp::List& icd9Mapping,
                              const std::string visitId, const std::string icd9Field,
