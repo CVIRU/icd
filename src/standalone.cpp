@@ -1,17 +1,12 @@
-#ifdef INSIDE
+//#ifdef ICD_STANDALONE
 
 // don't include my source files: this is like an external application so link against my Rcpp generated headers.
-#include "icd.h"
-#include <RcppCommon.h>
-#include <Rcpp.h>
 #include <RInside.h>
+#include "icd.h"
 #include <string>
 #include <iostream>
 
-
-//int main(int argc, char *argv[]) {
-int main() {
-  using namespace Rcpp;
+int main(int argc, char *argv[]) {
 
 	RInside R(argc, argv);          // create an embedded R instance
 
@@ -22,7 +17,7 @@ int main() {
 
 	Rcpp::Rcout << "res = " << res << "\n";
 
-	exit(0);
+	return 0; // or exit(0) ?
 }
 
-#endif // #INSIDE
+//#endif // #STANDALONE
