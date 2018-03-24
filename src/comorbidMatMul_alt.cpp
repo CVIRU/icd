@@ -1,8 +1,9 @@
+// [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::interfaces(r, cpp)]]
+// #ifdef ICD_EIGEN
 #include <Rcpp.h>
 #include <RcppEigen.h> // also add LinkingTo element in DESCRIPTION to enable
 #include <Eigen/SparseCore>
-// [[Rcpp::depends(RcppEigen)]]
-// [[Rcpp::interfaces(r, cpp)]]
 #include "comorbidCommon.h"
 #include "comorbidSetup.h"
 #include <algorithm>                   // for binary_search, copy
@@ -90,3 +91,4 @@ SEXP icd9Comorbid_alt_MatMul(const SEXP& icd9df, const Rcpp::List& icd9Mapping,
 
   return List();
 }
+// #endif // ICD_EIGEN

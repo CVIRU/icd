@@ -48,13 +48,9 @@ extern "C" {
 #include <omp.h>
 #endif
 
-#ifdef HAVE_RCPPEIGEN_H
+//#ifdef HAVE_RCPPEIGEN_H
 #define ICD_EIGEN
-#endif
-
-#ifdef ICD_EIGEN
-#include <RcppEigen.h>
-#endif
+//#endif
 
 #if defined(ICD_VALGRIND) && defined(HAVE_VALGRIND_VALGRIND_H)
 #include <valgrind/callgrind.h>

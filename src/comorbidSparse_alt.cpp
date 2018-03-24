@@ -1,10 +1,10 @@
-#include <Rcpp.h>
-#ifdef ICD_EIGEN
-
-#include <RcppEigen.h> // also add LinkingTo element in DESCRIPTION to enable
-#include <Eigen/SparseCore>
 // [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::interfaces(r, cpp)]]
+// #ifdef ICD_EIGEN
+
+#include <Rcpp.h>
+#include <RcppEigen.h> // also add LinkingTo element in DESCRIPTION to enable
+#include <Eigen/SparseCore>
 #include "comorbidCommon.h"
 #include "comorbidSetup.h"
 #include <Rcpp.h>
@@ -119,7 +119,7 @@ SEXP icd9Comorbid_alt_Sparse(const SEXP& icd9df, const Rcpp::List& icd9Mapping,
   const VecVecIntSz num_comorbid = map.size();
   const VecVecIntSz num_visits = vcdb.size();
 
-  Eigen::SparseMatrix<char, Eigen::RowMajor> out = lookupComorbidSparse(vcdb, map);
+  Eigen::SparseMatrix<char, Eigen::RowMajor> out = lookupComorbid_alt_Sparse(vcdb, map);
   out.transpose();
 
   //Rcpp::IntegerMatrix mat_out = Rcpp::wrap(out);
@@ -161,7 +161,7 @@ SEXP icd9Comorbid_alt_SparseOmp(const SEXP& icd9df, const Rcpp::List& icd9Mappin
   const VecVecIntSz num_comorbid = map.size();
   const VecVecIntSz num_visits = vcdb.size();
 
-  Eigen::SparseMatrix<char, Eigen::RowMajor> out = lookupComorbidSparseOmp(vcdb, map);
+  Eigen::SparseMatrix<char, Eigen::RowMajor> out = lookupComorbid_alt_SparseOmp(vcdb, map);
   out.transpose();
 
   //Rcpp::IntegerMatrix mat_out = Rcpp::wrap(out);
@@ -197,4 +197,4 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
   UNPROTECT(2);
 }
 
-#endif // ICD_EIGEN
+//# endif // ICD_EIGEN
