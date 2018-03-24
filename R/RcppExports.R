@@ -91,6 +91,22 @@ icd10cm_children_defined_cpp <- function(x) {
     .Call(`_icd_icd10cmChildrenDefined`, x)
 }
 
+#' comorbidity search with sparse matrix result, OMP test version
+#'
+#' Much less memory competition in writing output. As an example the Vermont
+#' data has 29,000 comorbidity flags (29 for each patient) Whereas only 2367
+#' AHRQ comorbidity are positive, so under 10%.
+#' @keywords internal
+lookupComorbid_alt_SparseOmp <- function(vcdb, map) {
+    .Call(`_icd_lookupComorbid_alt_SparseOmp`, vcdb, map)
+}
+
+#' @describeIn icd9Comorbid_alt_Taskloop Sparse comorbidity results with Eigen
+#' @keywords internal
+icd9Comorbid_alt_SparseOmp <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
+    .Call(`_icd_icd9Comorbid_alt_SparseOmp`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
+}
+
 #' @rdname icd_comorbid
 #' @description \code{\link{Rcpp}} approach to comorbidity assignment with
 #'   OpenMP and vector of integers strategy. It is very fast, and most time is
@@ -144,6 +160,7 @@ icd10_comorbid_parent_search_cpp <- function(x, map, visit_name, icd_name) {
 #' Eigen has parallel (non-GPU) optimized sparse row-major *
 #' dense matrix. Patients-ICD matrix must be the row-major sparse one, so the
 #' dense matrix is then the comorbidity map
+#' \url{https://eigen.tuxfamily.org/dox/TopicMultiThreading.html}
 #' @examples
 #' # show how many discrete ICD codes there are in the AHRQ map, before reducing
 #' # to the number which actually appear in a group of patient visits
@@ -151,8 +168,8 @@ icd10_comorbid_parent_search_cpp <- function(x, map, visit_name, icd_name) {
 #' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
 #' \dontrun{
 #' # remove _alt line in .Rbuildignore, then these will be available. Also, re-enable [[Rcpp::depends(RcppEigen)]]
-#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidMatMul)
-#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidSparseOmp)
+#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_MatMul)
+#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_SparseOmp)
 #' }
 #' @keywords internal
 icd9Comorbid_alt_MatMul <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
@@ -169,18 +186,8 @@ lookupComorbid_alt_Sparse <- function(vcdb, map) {
     .Call(`_icd_lookupComorbid_alt_Sparse`, vcdb, map)
 }
 
-lookupComorbid_alt_SparseOmp <- function(vcdb, map) {
-    .Call(`_icd_lookupComorbid_alt_SparseOmp`, vcdb, map)
-}
-
 icd9Comorbid_alt_Sparse <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
     .Call(`_icd_icd9Comorbid_alt_Sparse`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
-}
-
-#' @describeIn icd9Comorbid_alt_Taskloop Sparse comorbidity results with Eigen
-#' @keywords internal
-icd9Comorbid_alt_SparseOmp <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
-    .Call(`_icd_icd9Comorbid_alt_SparseOmp`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
 }
 
 #' alternate comorbidity search

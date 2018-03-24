@@ -37,20 +37,19 @@ extern "C" {
 // #define ICD_DEBUG_PARALLEL
 // #define ICD_VALGRIND
 
-// enabling this stops the package compiling, but is useful for testing purely
-// in C++. See tools/standalone.sh
-// #define ICD_STANDALONE
-
 // not enough to test whether header is available, because it may be disabled in
 // R: #ifdef _OPENMP
-#ifdef HAVE_R_OPENMP
+
+// define backwards so rstudio assumes it is present for syntax and reference checking
 #define ICD_OPENMP
-#include <omp.h>
+#ifndef HAVE_R_OPENMP
+#undef ICD_OPENMP
 #endif
 
-//#ifdef HAVE_RCPPEIGEN_H
 #define ICD_EIGEN
-//#endif
+#ifndef HAVE_RCPPEIGEN_H
+#undef ICD_EIGEN
+#endif
 
 #if defined(ICD_VALGRIND) && defined(HAVE_VALGRIND_VALGRIND_H)
 #include <valgrind/callgrind.h>
@@ -60,13 +59,6 @@ extern "C" {
 
 typedef std::unordered_map<std::string, VecInt::size_type> VisLk;
 typedef std::unordered_set<std::string> icd_set;
-
-//void buildMap(const Rcpp::List& icd9Mapping, VecVecInt& map);
-//void buildVisitCodesVec(const SEXP& icd9df, const std::string& visitId,
-//                        const std::string& icd9Field, VecVecInt& vcdb, VecStr& visitIds,
-//                        const bool aggregate);
-//ComorbidOut lookupComorbidByChunkFor(const VecVecInt& vcdb,
-//                                     const VecVecInt& map, const int chunkSize, const int ompChunkSize);
 
 #if (defined ICD_DEBUG || defined ICD_DEBUG_SETUP)
 #include <iostream>

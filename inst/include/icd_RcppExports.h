@@ -213,6 +213,44 @@ namespace icd {
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
     }
 
+    inline Eigen::SparseMatrix<char, Eigen::RowMajor> lookupComorbid_alt_SparseOmp(const VecVecInt& vcdb, const VecVecInt& map) {
+        typedef SEXP(*Ptr_lookupComorbid_alt_SparseOmp)(SEXP,SEXP);
+        static Ptr_lookupComorbid_alt_SparseOmp p_lookupComorbid_alt_SparseOmp = NULL;
+        if (p_lookupComorbid_alt_SparseOmp == NULL) {
+            validateSignature("Eigen::SparseMatrix<char, Eigen::RowMajor>(*lookupComorbid_alt_SparseOmp)(const VecVecInt&,const VecVecInt&)");
+            p_lookupComorbid_alt_SparseOmp = (Ptr_lookupComorbid_alt_SparseOmp)R_GetCCallable("icd", "_icd_lookupComorbid_alt_SparseOmp");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_lookupComorbid_alt_SparseOmp(Shield<SEXP>(Rcpp::wrap(vcdb)), Shield<SEXP>(Rcpp::wrap(map)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<Eigen::SparseMatrix<char, Eigen::RowMajor> >(rcpp_result_gen);
+    }
+
+    inline SEXP icd9Comorbid_alt_SparseOmp(const SEXP& icd9df, const Rcpp::List& icd9Mapping, const std::string visitId, const std::string icd9Field, const int threads = 8, const int chunk_size = 256, const int omp_chunk_size = 1, bool aggregate = true) {
+        typedef SEXP(*Ptr_icd9Comorbid_alt_SparseOmp)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
+        static Ptr_icd9Comorbid_alt_SparseOmp p_icd9Comorbid_alt_SparseOmp = NULL;
+        if (p_icd9Comorbid_alt_SparseOmp == NULL) {
+            validateSignature("SEXP(*icd9Comorbid_alt_SparseOmp)(const SEXP&,const Rcpp::List&,const std::string,const std::string,const int,const int,const int,bool)");
+            p_icd9Comorbid_alt_SparseOmp = (Ptr_icd9Comorbid_alt_SparseOmp)R_GetCCallable("icd", "_icd_icd9Comorbid_alt_SparseOmp");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_icd9Comorbid_alt_SparseOmp(Shield<SEXP>(Rcpp::wrap(icd9df)), Shield<SEXP>(Rcpp::wrap(icd9Mapping)), Shield<SEXP>(Rcpp::wrap(visitId)), Shield<SEXP>(Rcpp::wrap(icd9Field)), Shield<SEXP>(Rcpp::wrap(threads)), Shield<SEXP>(Rcpp::wrap(chunk_size)), Shield<SEXP>(Rcpp::wrap(omp_chunk_size)), Shield<SEXP>(Rcpp::wrap(aggregate)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<SEXP >(rcpp_result_gen);
+    }
+
     inline SEXP icd9ComorbidShortCpp(const SEXP& icd9df, const Rcpp::List& icd9Mapping, const std::string visitId, const std::string icd9Field, const int threads = 8, const int chunk_size = 256, const int omp_chunk_size = 1, bool aggregate = true) {
         typedef SEXP(*Ptr_icd9ComorbidShortCpp)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_icd9ComorbidShortCpp p_icd9ComorbidShortCpp = NULL;
@@ -307,25 +345,6 @@ namespace icd {
         return Rcpp::as<Eigen::SparseMatrix<char, Eigen::RowMajor> >(rcpp_result_gen);
     }
 
-    inline Eigen::SparseMatrix<char, Eigen::RowMajor> lookupComorbid_alt_SparseOmp(const VecVecInt& vcdb, const VecVecInt& map) {
-        typedef SEXP(*Ptr_lookupComorbid_alt_SparseOmp)(SEXP,SEXP);
-        static Ptr_lookupComorbid_alt_SparseOmp p_lookupComorbid_alt_SparseOmp = NULL;
-        if (p_lookupComorbid_alt_SparseOmp == NULL) {
-            validateSignature("Eigen::SparseMatrix<char, Eigen::RowMajor>(*lookupComorbid_alt_SparseOmp)(const VecVecInt&,const VecVecInt&)");
-            p_lookupComorbid_alt_SparseOmp = (Ptr_lookupComorbid_alt_SparseOmp)R_GetCCallable("icd", "_icd_lookupComorbid_alt_SparseOmp");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_lookupComorbid_alt_SparseOmp(Shield<SEXP>(Rcpp::wrap(vcdb)), Shield<SEXP>(Rcpp::wrap(map)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<Eigen::SparseMatrix<char, Eigen::RowMajor> >(rcpp_result_gen);
-    }
-
     inline SEXP icd9Comorbid_alt_Sparse(const SEXP& icd9df, const Rcpp::List& icd9Mapping, const std::string visitId, const std::string icd9Field, const int threads = 8, const int chunk_size = 256, const int omp_chunk_size = 1, bool aggregate = true) {
         typedef SEXP(*Ptr_icd9Comorbid_alt_Sparse)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_icd9Comorbid_alt_Sparse p_icd9Comorbid_alt_Sparse = NULL;
@@ -337,25 +356,6 @@ namespace icd {
         {
             RNGScope RCPP_rngScope_gen;
             rcpp_result_gen = p_icd9Comorbid_alt_Sparse(Shield<SEXP>(Rcpp::wrap(icd9df)), Shield<SEXP>(Rcpp::wrap(icd9Mapping)), Shield<SEXP>(Rcpp::wrap(visitId)), Shield<SEXP>(Rcpp::wrap(icd9Field)), Shield<SEXP>(Rcpp::wrap(threads)), Shield<SEXP>(Rcpp::wrap(chunk_size)), Shield<SEXP>(Rcpp::wrap(omp_chunk_size)), Shield<SEXP>(Rcpp::wrap(aggregate)));
-        }
-        if (rcpp_result_gen.inherits("interrupted-error"))
-            throw Rcpp::internal::InterruptedException();
-        if (rcpp_result_gen.inherits("try-error"))
-            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<SEXP >(rcpp_result_gen);
-    }
-
-    inline SEXP icd9Comorbid_alt_SparseOmp(const SEXP& icd9df, const Rcpp::List& icd9Mapping, const std::string visitId, const std::string icd9Field, const int threads = 8, const int chunk_size = 256, const int omp_chunk_size = 1, bool aggregate = true) {
-        typedef SEXP(*Ptr_icd9Comorbid_alt_SparseOmp)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-        static Ptr_icd9Comorbid_alt_SparseOmp p_icd9Comorbid_alt_SparseOmp = NULL;
-        if (p_icd9Comorbid_alt_SparseOmp == NULL) {
-            validateSignature("SEXP(*icd9Comorbid_alt_SparseOmp)(const SEXP&,const Rcpp::List&,const std::string,const std::string,const int,const int,const int,bool)");
-            p_icd9Comorbid_alt_SparseOmp = (Ptr_icd9Comorbid_alt_SparseOmp)R_GetCCallable("icd", "_icd_icd9Comorbid_alt_SparseOmp");
-        }
-        RObject rcpp_result_gen;
-        {
-            RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_icd9Comorbid_alt_SparseOmp(Shield<SEXP>(Rcpp::wrap(icd9df)), Shield<SEXP>(Rcpp::wrap(icd9Mapping)), Shield<SEXP>(Rcpp::wrap(visitId)), Shield<SEXP>(Rcpp::wrap(icd9Field)), Shield<SEXP>(Rcpp::wrap(threads)), Shield<SEXP>(Rcpp::wrap(chunk_size)), Shield<SEXP>(Rcpp::wrap(omp_chunk_size)), Shield<SEXP>(Rcpp::wrap(aggregate)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
