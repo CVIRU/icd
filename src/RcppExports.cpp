@@ -504,7 +504,7 @@ RcppExport SEXP _icd_icd10_comorbid_parent_search_cpp(SEXP xSEXP, SEXP mapSEXP, 
     return rcpp_result_gen;
 }
 // icd9Comorbid_alt_MatMul
-SEXP icd9Comorbid_alt_MatMul(const SEXP& icd9df, const Rcpp::List& icd9Mapping, const std::string visitId, const std::string icd9Field, const int threads, const int chunk_size, const int omp_chunk_size, bool aggregate);
+IntegerMatrix icd9Comorbid_alt_MatMul(const SEXP& icd9df, const Rcpp::List& icd9Mapping, const std::string visitId, const std::string icd9Field, const int threads, const int chunk_size, const int omp_chunk_size, bool aggregate);
 static SEXP _icd_icd9Comorbid_alt_MatMul_try(SEXP icd9dfSEXP, SEXP icd9MappingSEXP, SEXP visitIdSEXP, SEXP icd9FieldSEXP, SEXP threadsSEXP, SEXP chunk_sizeSEXP, SEXP omp_chunk_sizeSEXP, SEXP aggregateSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -2315,7 +2315,7 @@ static int _icd_RcppExport_validate(const char* sig) {
         signatures.insert("SEXP(*icd9ComorbidShortCpp)(const SEXP&,const Rcpp::List&,const std::string,const std::string,const int,const int,const int,bool)");
         signatures.insert("void(*lookupComorbidByChunkFor)(const VecVecInt&,const VecVecInt&,const VecVecIntSz,const VecVecIntSz,ComorbidOut&)");
         signatures.insert("Rcpp::LogicalMatrix(*icd10_comorbid_parent_search_cpp)(Rcpp::DataFrame,Rcpp::List,std::string,std::string)");
-        signatures.insert("SEXP(*icd9Comorbid_alt_MatMul)(const SEXP&,const Rcpp::List&,const std::string,const std::string,const int,const int,const int,bool)");
+        signatures.insert("IntegerMatrix(*icd9Comorbid_alt_MatMul)(const SEXP&,const Rcpp::List&,const std::string,const std::string,const int,const int,const int,bool)");
         signatures.insert("Eigen::SparseMatrix<char, Eigen::RowMajor>(*lookupComorbid_alt_Sparse)(const VecVecInt&,const VecVecInt&)");
         signatures.insert("SEXP(*icd9Comorbid_alt_Sparse)(const SEXP&,const Rcpp::List&,const std::string,const std::string,const int,const int,const int,bool)");
         signatures.insert("void(*lookupComorbid_alt_ByChunkForTaskloop)(const VecVecInt&,const VecVecInt&,NewOut&)");

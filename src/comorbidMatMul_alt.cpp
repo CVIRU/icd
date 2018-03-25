@@ -136,7 +136,7 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
 //' }
 //' @keywords internal
 // [[Rcpp::export]]
-SEXP icd9Comorbid_alt_MatMul(const SEXP& icd9df, const Rcpp::List& icd9Mapping,
+IntegerMatrix icd9Comorbid_alt_MatMul(const SEXP& icd9df, const Rcpp::List& icd9Mapping,
                              const std::string visitId, const std::string icd9Field,
                              const int threads = 8, const int chunk_size = 256,
                              const int omp_chunk_size = 1, bool aggregate = true) {

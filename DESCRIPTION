@@ -48,5 +48,6 @@ VignetteBuilder: knitr
 LinkingTo:
     Rcpp,
     RcppEigen,
+    RInside,
     testthat
 RoxygenNote: 6.0.1

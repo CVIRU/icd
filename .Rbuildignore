@@ -36,7 +36,7 @@ icd9cm_billable[[:digit:]]+\.RData$
 icd.*\.Rnw$
 icd.*tar\.gz
 ^include-dependencies(\.d)?$
-inst\/standalone\/.*
+standalone\/.*
 \.lintr$
 .*\.log$
 ^src\/Makevars$
@@ -57,4 +57,4 @@ scrape_icd10_who
 ^todo$
 ^tools$
 ^\.travis\.yml$
-^appveyor\.yml$
+^.*\.xcworkspace$
