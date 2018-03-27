@@ -91,6 +91,45 @@ icd10cm_children_defined_cpp <- function(x) {
     .Call(`_icd_icd10cmChildrenDefined`, x)
 }
 
+buildVisitCodesVecSparse <- function(icd9df, visitId, icd9Field, sparse_db, visitIds, aggregate = TRUE) {
+    invisible(.Call(`_icd_buildVisitCodesVecSparse`, icd9df, visitId, icd9Field, sparse_db, visitIds, aggregate))
+}
+
+#' @title prototype to do entire comorbidity calculation as a matrix multiplication
+#' @description
+#' The problem is that the matrices could be huge: the patient-icd matrix would
+#' be millions of patient rows, and ~15000 columns for all AHRQ comorbidities.
+#' @details
+#' Several ways of reducing the problem: firstly, as with existing code, we can
+#' drop any ICD codes from the map which are not in the patient data. With many
+#' patients, this will be less effective as the long tail becomes apparent.
+#' However, with the (small) Vermont data, we see ~15,000 codes being reduced to
+#' 339.
+#' @section Sparse matrices
+#' Using sparse matrices is another solution. Building
+#' the initial matrix may become a significant part of the calculation, but once
+#' done, the solution could be a simple matrix multiplication, which is
+#' potentially highly optimized (Eigen, BLAS, GPU, etc.)
+#' @section Eigen
+#' Eigen has parallel (non-GPU) optimized sparse row-major *
+#' dense matrix. Patients-ICD matrix must be the row-major sparse one, so the
+#' dense matrix is then the comorbidity map
+#' \url{https://eigen.tuxfamily.org/dox/TopicMultiThreading.html}
+#' @examples
+#' # show how many discrete ICD codes there are in the AHRQ map, before reducing
+#' # to the number which actually appear in a group of patient visits
+#' sapply(icd::icd9_map_ahrq, length) %>% sum
+#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
+#' \dontrun{
+#' # remove _alt line in .Rbuildignore, then these will be available. Also, re-enable [[Rcpp::depends(RcppEigen)]]
+#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_MatMul)
+#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_SparseOmp)
+#' }
+#' @keywords internal
+icd9Comorbid_alt_MatMul <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
+    .Call(`_icd_icd9Comorbid_alt_MatMul`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
+}
+
 #' comorbidity search with sparse matrix result, OMP test version
 #'
 #' Much less memory competition in writing output. As an example the Vermont
@@ -139,41 +178,6 @@ lookupComorbidByChunkFor <- function(vcdb, map, chunkSize, ompChunkSize, out) {
 #' @keywords internal
 icd10_comorbid_parent_search_cpp <- function(x, map, visit_name, icd_name) {
     .Call(`_icd_icd10_comorbid_parent_search_cpp`, x, map, visit_name, icd_name)
-}
-
-#' @title prototype to do entire comorbidity calculation as a matrix multiplication
-#' @description
-#' The problem is that the matrices could be huge: the patient-icd matrix would
-#' be millions of patient rows, and ~15000 columns for all AHRQ comorbidities.
-#' @details
-#' Several ways of reducing the problem: firstly, as with existing code, we can
-#' drop any ICD codes from the map which are not in the patient data. With many
-#' patients, this will be less effective as the long tail becomes apparent.
-#' However, with the (small) Vermont data, we see ~15,000 codes being reduced to
-#' 339.
-#' @section Sparse matrices
-#' Using sparse matrices is another solution. Building
-#' the initial matrix may become a significant part of the calculation, but once
-#' done, the solution could be a simple matrix multiplication, which is
-#' potentially highly optimized (Eigen, BLAS, GPU, etc.)
-#' @section Eigen
-#' Eigen has parallel (non-GPU) optimized sparse row-major *
-#' dense matrix. Patients-ICD matrix must be the row-major sparse one, so the
-#' dense matrix is then the comorbidity map
-#' \url{https://eigen.tuxfamily.org/dox/TopicMultiThreading.html}
-#' @examples
-#' # show how many discrete ICD codes there are in the AHRQ map, before reducing
-#' # to the number which actually appear in a group of patient visits
-#' sapply(icd::icd9_map_ahrq, length) %>% sum
-#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
-#' \dontrun{
-#' # remove _alt line in .Rbuildignore, then these will be available. Also, re-enable [[Rcpp::depends(RcppEigen)]]
-#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_MatMul)
-#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_SparseOmp)
-#' }
-#' @keywords internal
-icd9Comorbid_alt_MatMul <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
-    .Call(`_icd_icd9Comorbid_alt_MatMul`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
 }
 
 #' comorbidity search with sparse matrix result

@@ -6,7 +6,6 @@
 #ifdef ICD_EIGEN // rest of file
 #include <Rcpp.h>
 #include <RcppEigen.h> // also add LinkingTo element in DESCRIPTION to enable
-#include <Eigen/SparseCore>
 #include "comorbidCommon.h"
 #include "comorbidSetup.h"
 #include <Rcpp.h>
@@ -25,12 +24,6 @@ using namespace Rcpp;
 // use row-major sparse matrix - row major because easier to insert into Eigen
 // sparse matrix, and we discover comorbidities one patient at a time, i.e. row
 // major
-
-// using the typedef confuses Rcpp
-//typedef Eigen::SparseMatrix<char, Eigen::RowMajor> SparseOut; // bool, char or int?
-// https://eigen.tuxfamily.org/dox/group__TutorialSparse.html
-typedef Eigen::Triplet<char> Triplet;
-typedef Eigen::SparseMatrix<char, Eigen::RowMajor> PtsSparse;
 
 //' comorbidity search with sparse matrix result, OMP test version
 //'

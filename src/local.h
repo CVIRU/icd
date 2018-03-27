@@ -51,14 +51,26 @@ extern "C" {
 #undef ICD_EIGEN
 #endif
 
+#ifdef ICD_EIGEN
+#include <Rcpp.h>
+#include <RcppEigen.h> // also add LinkingTo element in DESCRIPTION to enable
+#include <Eigen/SparseCore>
+
+// using the typedef confuses Rcpp?
+//typedef Eigen::SparseMatrix<char, Eigen::RowMajor> SparseOut; // bool, char or int?
+// https://eigen.tuxfamily.org/dox/group__TutorialSparse.html
+typedef int SparseValue;
+typedef Eigen::Triplet<SparseValue> Triplet;
+typedef Eigen::SparseMatrix<SparseValue, Eigen::RowMajor> PtsSparse;
+typedef Eigen::MatrixXi DenseMap;
+
+#endif
+
 #if defined(ICD_VALGRIND) && defined(HAVE_VALGRIND_VALGRIND_H)
 #include <valgrind/callgrind.h>
 #else
 #undef ICD_VALGRIND
 #endif
-
-typedef std::unordered_map<std::string, VecInt::size_type> VisLk;
-typedef std::unordered_set<std::string> icd_set;
 
 #if (defined ICD_DEBUG || defined ICD_DEBUG_SETUP)
 #include <iostream>

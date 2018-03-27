@@ -34,15 +34,13 @@ ICDLIBS := 		-L$(ICD)/libs
 ## compiler etc settings used in default make rules
 CXX := 			$(shell $(R_HOME)/bin/R CMD config CXX11)
 CPPFLAGS := 		-Wall $(shell $(R_HOME)/bin/R CMD config CPPFLAGS)
-CXXFLAGS := 		 -DICD_STANDALONE $(ICDINCL) $(RCPPEIGENINCL) $(RCPPFLAGS) $(RCPPINCL) $(RINSIDEINCL) $(shell $(R_HOME)/bin/R CMD config CXX11FLAGS)
-LDLIBS := 		$(ICDLIBS) $(RLDFLAGS) $(RRPATH) $(RBLAS) $(RLAPACK) $(RINSIDELIBS)
+CXXFLAGS := 		 -DICD_STANDALONE $(ICDINCL) $(RCPPEIGENINCL) $(RCPPFLAGS) $(RCPPINCL) $(RINSIDEINCL) $(shell $(R_HOME)/bin/R CMD config CXX11FLAGS) -fno-openmp
+LDLIBS := 		$(ICDLIBS) $(RLDFLAGS) $(RRPATH) $(RBLAS) $(RLAPACK) $(RINSIDELIBS) -fno-openmp
 
-## all: 			$(programs)
+all: 			$(programs)
 ##		@test -x /usr/bin/strip && strip $^
 
-all:          standalone
-
-standalone: standalone.o ; $(CXX) $(LDFLAGS) -o standalone standalone.o $(LDLIBS) -fno-openmp
-
-standalone.o: standalone.cpp ; $(CXX) $(CXXFLAGS) -c standalone.cpp -fno-openmp
+## all:          standalone
+standalone: standalone.o ; $(CXX) $(LDFLAGS) -o standalone standalone.o $(LDLIBS)
+standalone.o: standalone.cpp ; $(CXX) $(CXXFLAGS) -c standalone.cpp
 

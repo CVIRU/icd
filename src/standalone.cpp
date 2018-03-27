@@ -1,6 +1,7 @@
 #ifdef ICD_STANDALONE
 
 #include "icd.h"
+#include "comorbid_alt_MatMul.h"
 
 // don't include my source files: this is like an external application so link
 // against my Rcpp generated headers.
@@ -36,10 +37,10 @@ int main(int argc, char *argv[]) {
     two_map["malady"] = CharacterVector::create("100", "200");
     two_map["ailment"] = CharacterVector::create("003", "040");
 
-
-    Rcpp::IntegerMatrix out = icd::icd9Comorbid_alt_MatMul(two_pts, two_map,
-                                                           "visit_id", "icd9",
-                                                           0, 0, 0, true);
+    // call _direct to avoid Rcpp intercepting the call
+    Rcpp::IntegerMatrix out = icd9Comorbid_alt_MatMul_direct(two_pts, two_map,
+                                                             "visit_id", "icd9",
+                                                             0, 0, 0, true);
 
     std::cout << "res = " << out << "\n";
 

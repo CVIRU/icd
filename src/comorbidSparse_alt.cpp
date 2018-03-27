@@ -24,12 +24,6 @@ using namespace Rcpp;
 // sparse matrix, and we discover comorbidities one patient at a time, i.e. row
 // major
 
-// using the typedef confuses Rcpp
-//typedef Eigen::SparseMatrix<char, Eigen::RowMajor> SparseOut; // bool, char or int?
-// https://eigen.tuxfamily.org/dox/group__TutorialSparse.html
-typedef Eigen::Triplet<char> Triplet;
-typedef Eigen::SparseMatrix<char, Eigen::RowMajor> PtsSparse;
-
 //' comorbidity search with sparse matrix result
 //'
 //' Much less memory competition in writing output. As an example the Vermont

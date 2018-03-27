@@ -3,16 +3,11 @@
 #include "config.h"                     // for valgrind, CXX11 etc
 #include "local.h"                     // for ICD_OPENMP
 #ifdef ICD_EIGEN // rest of file
-#include <Rcpp.h>
-#include <RcppEigen.h> // also add LinkingTo element in DESCRIPTION to enable
-#include <Eigen/SparseCore>
 #include "comorbidCommon.h"
 #include "comorbidSetup.h"
 #include <algorithm>                   // for binary_search, copy
 #include <vector>                      // for vector, vector<>::const_iterator
 #include "icd_types.h"                 // for ComorbidOut, VecVecInt, VecVec...
-#include "local.h"                     // for ICD_OPENMP
-#include "config.h"                     // for valgrind, CXX11 etc
 #include "util.h"                     // for debug_parallel
 extern "C" {
 #include "cutil.h"                              // for getRListOrDfElement
@@ -24,16 +19,9 @@ using namespace Rcpp;
 // sparse matrix, and we discover comorbidities one patient at a time, i.e. row
 // major
 
-// using the typedef confuses Rcpp
-//typedef Eigen::SparseMatrix<char, Eigen::RowMajor> SparseOut; // bool, char or int?
-// https://eigen.tuxfamily.org/dox/group__TutorialSparse.html
-typedef int SparseValue;
-typedef Eigen::Triplet<SparseValue> Triplet;
-typedef Eigen::SparseMatrix<SparseValue, Eigen::RowMajor> PtsSparse;
-typedef Eigen::MatrixXi DenseMap;
-
 // alternate version which builds a sparse matrix, row-major, which is good for
 // LHS of multrix multiplication in Eigen
+// [[Rcpp::export]]
 void buildVisitCodesVecSparse(const SEXP& icd9df,
                               const std::string& visitId,
                               const std::string& icd9Field,
@@ -41,7 +29,6 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
                               VecStr& visitIds, // will have to get this from sparse matrix at end, but needed?
                               const bool aggregate = true // remove or ignore
 ) {
-
   SEXP icds = PROTECT(getRListOrDfElement(icd9df, icd9Field.c_str())); // this is a factor
   SEXP vsexp = PROTECT(getRListOrDfElement(icd9df, visitId.c_str()));
   IntegerVector icd9dfFactor = as<IntegerVector>(icds);
@@ -52,12 +39,12 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
 
   int vlen = Rf_length(icds); // or vsexp
   // make an unordered set for quick check for duplicates while building list of unique visit ids
-  std::unordered_set<std::string> visit_lookup;
-  visit_lookup.reserve(vlen);
+  VisLk vis_lookup;
+  vis_lookup.reserve(vlen);
   // also maintain list of (ordered as first encountered) visit ids
   visitIds.resize(vlen); // resize and trim at end, as alternative to reserve
   int n;
-  VisLk vis_lookup;
+
   VecVecIntSz vcdb_max_idx = -1; // we increment immediately to zero as first index
   VecVecIntSz vcdb_new_idx;
   VecVecIntSz vcdb_last_idx;
@@ -71,19 +58,22 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
   for (int i = 0; i != vlen; ++i) {
     const char* visit = CHAR(STRING_ELT(vsexp, i));
     n = INTEGER(icds)[i]; // ICD codes are in a factor, so get the integer index
+    // TODO: if factor, then are these always just 1:n, so is n always equal to i???
+    if (i != n)
+      Rcpp::Rcout << "factor index i not equal to factor number n" << std::endl;
 
     if (lastVisitId != visit) {
       // assume new visitId unless aggregating
       vcdb_new_idx = vcdb_max_idx + 1;
       if (aggregate) { // only use map if aggregating
-        VisLk::iterator found = vis_lookup.find(visit); // did we see this visit already?
-        if (found != vis_lookup.end()) {
+        VisLk::iterator found = vis_lookup.find(visit); // did we see this visit already? Get name-index pair.
+        if (found != vis_lookup.end()) { // we found the old visit
           // we saved the index in the map, so use that to insert a triplet:
           visTriplets.push_back(Triplet(found->second, n, true));
           continue; // and continue with next row
         } else { // otherwise we found a new visitId, so add it to our lookup table
-          vis_lookup.insert(
-            std::make_pair(visit, vcdb_new_idx)); // new visit, with associated position in vcdb
+          VisLkPair vis_lookup_pair = std::make_pair(visit, vcdb_new_idx);
+          vis_lookup.insert(vis_lookup_pair); // new visit, with associated position in vcdb
         }
       } // end if aggregate
       // we didn't have an existing visitId, or we are just assuming visitIds are ordered (not aggregating)
@@ -92,7 +82,7 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
       lastVisitId = visit;
       vcdb_last_idx = vcdb_new_idx;
       ++vcdb_max_idx;
-    } else { // last visitId was the same as the current one, so we skip all the logic
+    } else { // last visitId was the same as the current one, so we can skip all the logic
       visTriplets.push_back(Triplet(vcdb_last_idx, n, true));
     }
 
@@ -102,6 +92,53 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
   // sparse_db and visitIds are updated
   sparse_db.setFromTriplets(visTriplets.begin(), visTriplets.end());
   visitIds.resize(vcdb_max_idx + 1); // we over-sized (not just over-reserved) so now we trim.
+}
+
+IntegerMatrix icd9Comorbid_alt_MatMul_direct(const Rcpp::DataFrame& icd9df, const Rcpp::List& icd9Mapping,
+                                             const std::string visitId, const std::string icd9Field,
+                                             const int threads = 8, const int chunk_size = 256,
+                                             const int omp_chunk_size = 1, bool aggregate = true) {
+  valgrindCallgrindStart(true);
+  VecStr out_row_names; // size is reserved in buildVisitCodesVec
+  // find eventual size of map matrix:
+  size_t map_rows = 0;
+  for (List::const_iterator li = icd9Mapping.begin(); li != icd9Mapping.end(); ++li) {
+    IntegerVector v = *li;
+    map_rows += v.size();
+  }
+
+  size_t row = 0;
+  // make an integer matrix for the map. not sparse. No boolean option, I don't think.
+  DenseMap map(map_rows, icd9Mapping.length());
+  for (List::const_iterator li = icd9Mapping.begin(); li != icd9Mapping.end(); ++li) {
+    IntegerVector v = *li;
+    for (IntegerVector::iterator vi = v.begin(); vi != v.end(); ++vi, ++row) {
+      map.coeffRef(row, std::distance(v.begin(), vi)) = true;
+    }
+  }
+  Rcpp::Rcout << "first cell of map should be 1: it is " << map(0, 0) << std::endl;
+
+  // now build the patient:icd matrix... can probably re-use and simplify the
+  PtsSparse sparse_db; // reservation and sizing done next
+  buildVisitCodesVecSparse(icd9df, visitId, icd9Field, sparse_db, out_row_names, aggregate);
+  Rcpp::Rcout << " built the sparse matrix " << std::endl;
+  DenseMap result = sparse_db * map;
+  Rcpp::Rcout << " done matrix multiplication " << std::endl;
+  Rcpp::IntegerMatrix mat_out = Rcpp::wrap(result);
+  Rcpp::Rcout << " casting to integer matrix " << std::endl;
+  List dimnames = Rcpp::List::create(icd9Mapping.names(), out_row_names);
+  CharacterVector rownames = dimnames[0];
+  CharacterVector colnames = dimnames[1];
+  Rcpp::Rcout << "mat_out rows = " << mat_out.rows() << std::endl;
+  Rcpp::Rcout << "mat_out cols = " << mat_out.cols() << std::endl;
+  Rcpp::Rcout << "Length of dimnames = " << dimnames.size() << std::endl;
+  Rcpp::Rcout << "Length of rownames = " << rownames.size() << std::endl;
+  Rcpp::Rcout << "Length of colnames = " << colnames.size() << std::endl;
+  mat_out.attr("dimnames") = dimnames;
+  Rcpp::Rcout << "dimension names set" << std::endl;
+
+  valgrindCallgrindStop();
+  return mat_out;
 }
 
 //' @title prototype to do entire comorbidity calculation as a matrix multiplication
@@ -136,43 +173,17 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
 //' }
 //' @keywords internal
 // [[Rcpp::export]]
-IntegerMatrix icd9Comorbid_alt_MatMul(const SEXP& icd9df, const Rcpp::List& icd9Mapping,
-                             const std::string visitId, const std::string icd9Field,
-                             const int threads = 8, const int chunk_size = 256,
-                             const int omp_chunk_size = 1, bool aggregate = true) {
-  valgrindCallgrindStart(true);
-  VecStr out_row_names; // size is reserved in buildVisitCodesVec
-  // find eventual size of map matrix:
-  size_t map_rows = 0;
-  for (List::const_iterator li = icd9Mapping.begin(); li != icd9Mapping.end(); ++li) {
-    IntegerVector v = *li;
-    map_rows += v.size();
-  }
-
-  size_t row = 0;
-  // make an integer matrix for the map. not sparse. No boolean option, I don't think.
-  DenseMap map(map_rows, icd9Mapping.length());
-  for (List::const_iterator li = icd9Mapping.begin(); li != icd9Mapping.end(); ++li) {
-    IntegerVector v = *li;
-    for (IntegerVector::iterator vi = v.begin(); vi != v.end(); ++vi, ++row) {
-      map.coeffRef(row, std::distance(v.begin(), vi)) = true;
-    }
-  }
-  Rcpp::Rcout << "first cell of map should be 1: it is " << map(0, 0) << std::endl;
-
-  // now build the patient:icd matrix... can probably re-use and simplify the
-  PtsSparse sparse_db; // reservation and sizing done next
-  buildVisitCodesVecSparse(icd9df, visitId, icd9Field, sparse_db, out_row_names, aggregate);
-  Rcpp::Rcout << " built the sparse matrix " << std::endl;
-  DenseMap result = sparse_db * map;
-  Rcpp::Rcout << " done matrix multiplication " << std::endl;
-  Rcpp::IntegerMatrix mat_out = Rcpp::wrap(result);
-  Rcpp::Rcout << " cast to integer matrix " << std::endl;
-  mat_out.attr("dimnames") = Rcpp::List::create(icd9Mapping.names(), out_row_names);
-  Rcpp::Rcout << "dimension names set" << std::endl;
-
-  valgrindCallgrindStop();
-  return mat_out;
+IntegerMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp::List& icd9Mapping,
+                                      const std::string visitId, const std::string icd9Field,
+                                      const int threads = 8, const int chunk_size = 256,
+                                      const int omp_chunk_size = 1, bool aggregate = true) {
+  // icd_RcppExports.h redirects the function call to go through Rcpp. This uses
+  // pointer to actually call the function which prevents my attempts at
+  // step-by-step debugging in Xcode.
+  return icd9Comorbid_alt_MatMul_direct(icd9df, icd9Mapping,
+                                        visitId, icd9Field,
+                                        threads, chunk_size,
+                                        omp_chunk_size, aggregate);
 }
 
 #endif // ICD_EIGEN
