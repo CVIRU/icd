@@ -3,6 +3,7 @@
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
 
-# git config diff.nodiff.command /bin/true
+# git config diff.nodiff.command /usr/bin/true or /bin/true
 *RcppExports* diff=nodiff
+*.Rd diff=nodiff
 

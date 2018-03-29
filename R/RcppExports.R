@@ -91,61 +91,6 @@ icd10cm_children_defined_cpp <- function(x) {
     .Call(`_icd_icd10cmChildrenDefined`, x)
 }
 
-buildVisitCodesVecSparse <- function(icd9df, visitId, icd9Field, sparse_db, visitIds, aggregate = TRUE) {
-    invisible(.Call(`_icd_buildVisitCodesVecSparse`, icd9df, visitId, icd9Field, sparse_db, visitIds, aggregate))
-}
-
-#' @title prototype to do entire comorbidity calculation as a matrix multiplication
-#' @description
-#' The problem is that the matrices could be huge: the patient-icd matrix would
-#' be millions of patient rows, and ~15000 columns for all AHRQ comorbidities.
-#' @details
-#' Several ways of reducing the problem: firstly, as with existing code, we can
-#' drop any ICD codes from the map which are not in the patient data. With many
-#' patients, this will be less effective as the long tail becomes apparent.
-#' However, with the (small) Vermont data, we see ~15,000 codes being reduced to
-#' 339.
-#' @section Sparse matrices
-#' Using sparse matrices is another solution. Building
-#' the initial matrix may become a significant part of the calculation, but once
-#' done, the solution could be a simple matrix multiplication, which is
-#' potentially highly optimized (Eigen, BLAS, GPU, etc.)
-#' @section Eigen
-#' Eigen has parallel (non-GPU) optimized sparse row-major *
-#' dense matrix. Patients-ICD matrix must be the row-major sparse one, so the
-#' dense matrix is then the comorbidity map
-#' \url{https://eigen.tuxfamily.org/dox/TopicMultiThreading.html}
-#' @examples
-#' # show how many discrete ICD codes there are in the AHRQ map, before reducing
-#' # to the number which actually appear in a group of patient visits
-#' sapply(icd::icd9_map_ahrq, length) %>% sum
-#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
-#' \dontrun{
-#' # to test this, remove _alt line in .Rbuildignore, then these will be available. Also, re-enable [[Rcpp::depen22ds(RcppEigen)]]
-#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_MatMul)
-#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_SparseOmp)
-#' }
-#' @keywords internal
-icd9Comorbid_alt_MatMul <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
-    .Call(`_icd_icd9Comorbid_alt_MatMul`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
-}
-
-#' comorbidity search with sparse matrix result, OMP test version
-#'
-#' Much less memory competition in writing output. As an example the Vermont
-#' data has 29,000 comorbidity flags (29 for each patient) Whereas only 2367
-#' AHRQ comorbidity are positive, so under 10%.
-#' @keywords internal
-lookupComorbid_alt_SparseOmp <- function(vcdb, map) {
-    .Call(`_icd_lookupComorbid_alt_SparseOmp`, vcdb, map)
-}
-
-#' @describeIn icd9Comorbid_alt_Taskloop Sparse comorbidity results with Eigen
-#' @keywords internal
-icd9Comorbid_alt_SparseOmp <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
-    .Call(`_icd_icd9Comorbid_alt_SparseOmp`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
-}
-
 #' @rdname icd_comorbid
 #' @description \code{\link{Rcpp}} approach to comorbidity assignment with
 #'   OpenMP and vector of integers strategy. It is very fast, and most time is
@@ -231,8 +176,61 @@ icd9Comorbid_alt_Taskloop2 <- function(icd9df, icd9Mapping, visitId, icd9Field, 
     .Call(`_icd_icd9Comorbid_alt_Taskloop2`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
 }
 
-icd9MajMinToCode_alt_Old <- function(mjr, mnr, isShort) {
-    .Call(`_icd_icd9MajMinToCode_alt_Old`, mjr, mnr, isShort)
+buildVisitCodesVecSparse <- function(icd9df, visitId, icd9Field, sparse_db, visitIds, aggregate = TRUE) {
+    invisible(.Call(`_icd_buildVisitCodesVecSparse`, icd9df, visitId, icd9Field, sparse_db, visitIds, aggregate))
+}
+
+#' @title prototype to do entire comorbidity calculation as a matrix multiplication
+#' @description
+#' The problem is that the matrices could be huge: the patient-icd matrix would
+#' be millions of patient rows, and ~15000 columns for all AHRQ comorbidities.
+#' @details
+#' Several ways of reducing the problem: firstly, as with existing code, we can
+#' drop any ICD codes from the map which are not in the patient data. With many
+#' patients, this will be less effective as the long tail becomes apparent.
+#' However, with the (small) Vermont data, we see ~15,000 codes being reduced to
+#' 339.
+#' @section Sparse matrices
+#' Using sparse matrices is another solution. Building
+#' the initial matrix may become a significant part of the calculation, but once
+#' done, the solution could be a simple matrix multiplication, which is
+#' potentially highly optimized (Eigen, BLAS, GPU, etc.)
+#' @section Eigen
+#' Eigen has parallel (non-GPU) optimized sparse row-major *
+#' dense matrix. Patients-ICD matrix must be the row-major sparse one, so the
+#' dense matrix is then the comorbidity map
+#' \url{https://eigen.tuxfamily.org/dox/TopicMultiThreading.html}
+#' @examples
+#' # show how many discrete ICD codes there are in the AHRQ map, before reducing
+#' # to the number which actually appear in a group of patient visitsben
+#' sapply(icd::icd9_map_ahrq, length) %>% sum
+#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
+#' \dontrun{
+#' # to test this, remove _alt line in .Rbuildignore, then these will be available. Also, re-enable [[Rcpp::depen22ds(RcppEigen)]]
+#' microbenchmark::microbenchmark(
+#'   icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_MatMul),
+#'   icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp),
+#'   times = 25)
+#' }
+#' @keywords internal
+icd9Comorbid_alt_MatMul <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
+    .Call(`_icd_icd9Comorbid_alt_MatMul`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
+}
+
+#' comorbidity search with sparse matrix result, OMP test version
+#'
+#' Much less memory competition in writing output. As an example the Vermont
+#' data has 29,000 comorbidity flags (29 for each patient) Whereas only 2367
+#' AHRQ comorbidity are positive, so under 10%.
+#' @keywords internal
+lookupComorbid_alt_SparseOmp <- function(vcdb, map) {
+    .Call(`_icd_lookupComorbid_alt_SparseOmp`, vcdb, map)
+}
+
+#' @describeIn icd9Comorbid_alt_Taskloop Sparse comorbidity results with Eigen
+#' @keywords internal
+icd9Comorbid_alt_SparseOmp <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
+    .Call(`_icd_icd9Comorbid_alt_SparseOmp`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
 }
 
 #' @rdname convert
@@ -293,6 +291,10 @@ icd9_decimal_to_short_cpp <- function(x) {
 #' @keywords internal manip
 icd_get_major.icd9 <- function(x, short_code) {
     .Call(`_icd_icd9GetMajor`, x, short_code)
+}
+
+icd9MajMinToCode_alt_Old <- function(mjr, mnr, isShort) {
+    .Call(`_icd_icd9MajMinToCode_alt_Old`, mjr, mnr, isShort)
 }
 
 #' @name fastIntToString
@@ -380,24 +382,6 @@ icd_long_to_wide_cpp <- function(icd9df, visitId, icd9Field, aggregate = TRUE) {
     .Call(`_icd_icd9LongToWideCpp`, icd9df, visitId, icd9Field, aggregate)
 }
 
-#' Decompose a 'short' ICD code and insert the leading zeroes as needed.
-#'
-#' This should add leading zeroes when there is definitely no ambiguity,
-#' e.g. V1. However V10 should not be altered, because V010 is a different
-#' code. The goal is for this to be faster, but must be correct! Example in
-#' \code{manip.cpp} has the benchmark code.
-#' @keywords internal manip
-icd9AddLeadingZeroes_alt_ShortSingle <- function(x) {
-    .Call(`_icd_icd9AddLeadingZeroes_alt_ShortSingle`, x)
-}
-
-#' @describeIn icd9AddLeadingZeroes_alt_ShortSingle Directly apply
-#' icd9AddLeadingZeroesShortSingle to each code without separating into parts
-#' @keywords internal manip
-icd9_add_leading_zeroes_alt_cpp <- function(x, short_code) {
-    .Call(`_icd_icd9AddLeadingZeroes_alt_Direct`, x, short_code)
-}
-
 #' Simpler add leading zeroes without converting to parts and back
 #' @keywords internal manip
 icd9AddLeadingZeroesMajorSingle <- function(mjr) {
@@ -438,43 +422,22 @@ icd9_add_leading_zeroes_cpp <- function(x, short_code) {
     .Call(`_icd_icd9AddLeadingZeroes`, x, short_code)
 }
 
-#' Find child codes from vector of ICD-9 codes.
+#' Decompose a 'short' ICD code and insert the leading zeroes as needed.
 #'
-#' Pure C++11 implementation using \code{unordered set} to find children of
-#' given codes
-#' @examples
-#' \dontrun{
-#' if (requireNamespace("microbenchmark")) {
-#'   microbenchmark::microbenchmark(
-#'     icd:::icd9ChildrenShort(c("001", 100:500), onlyReal = TRUE),
-#'     icd:::icd9ChildrenShort_alt11(c("001", 100:500), onlyReal = TRUE),
-#'     times = 5)
-#'     # C++11 about 15% faster for this data
-#' }
-#' }
-#' @keywords internal
-icd9ChildrenShort_alt_11 <- function(icd9Short, onlyReal) {
-    .Call(`_icd_icd9ChildrenShort_alt_11`, icd9Short, onlyReal)
+#' This should add leading zeroes when there is definitely no ambiguity,
+#' e.g. V1. However V10 should not be altered, because V010 is a different
+#' code. The goal is for this to be faster, but must be correct! Example in
+#' \code{manip.cpp} has the benchmark code.
+#' @keywords internal manip
+icd9AddLeadingZeroes_alt_ShortSingle <- function(x) {
+    .Call(`_icd_icd9AddLeadingZeroes_alt_ShortSingle`, x)
 }
 
-#' C++ implementation of finding children of short codes
-#' @examples
-#' \dontrun{
-#' library(microbenchmark)
-#' microbenchmark(icd9ChildrenShort("001", T), icd9ChildrenShortStd("001", T), times = 100)
-#' microbenchmark(icd9ChildrenShort(c("001", 100:400), T),
-#'                icd9ChildrenShortUnordered(c("001", 100:400), T),
-#'                icd9ChildrenShortStd(c("001", 100:400), T),
-#'                times = 10)
-#' }
-#' # un-ordered set much faster, but may still need to sort result
-#' @keywords internal
-icd9ChildrenShort_alt_Std <- function(icd9Short, onlyReal) {
-    .Call(`_icd_icd9ChildrenShort_alt_Std`, icd9Short, onlyReal)
-}
-
-icd9Children_alt_ShortNoNaUnordered <- function(icd9Short, onlyReal) {
-    .Call(`_icd_icd9Children_alt_ShortNoNaUnordered`, icd9Short, onlyReal)
+#' @describeIn icd9AddLeadingZeroes_alt_ShortSingle Directly apply
+#' icd9AddLeadingZeroesShortSingle to each code without separating into parts
+#' @keywords internal manip
+icd9_add_leading_zeroes_alt_cpp <- function(x, short_code) {
+    .Call(`_icd_icd9AddLeadingZeroes_alt_Direct`, x, short_code)
 }
 
 icd9ExpandMinorStd <- function(mnr, isE) {
@@ -512,6 +475,45 @@ icd9ChildrenCpp <- function(icd9, isShort, onlyReal = TRUE) {
 #' @keywords internal
 icd_in_reference_code <- function(icd, icd_reference, short_code, short_reference = TRUE) {
     .Call(`_icd_icd_in_reference_code`, icd, icd_reference, short_code, short_reference)
+}
+
+#' Find child codes from vector of ICD-9 codes.
+#'
+#' Pure C++11 implementation using \code{unordered set} to find children of
+#' given codes
+#' @examples
+#' \dontrun{
+#' if (requireNamespace("microbenchmark")) {
+#'   microbenchmark::microbenchmark(
+#'     icd:::icd9ChildrenShort(c("001", 100:500), onlyReal = TRUE),
+#'     icd:::icd9ChildrenShort_alt11(c("001", 100:500), onlyReal = TRUE),
+#'     times = 5)
+#'     # C++11 about 15% faster for this data
+#' }
+#' }
+#' @keywords internal
+icd9ChildrenShort_alt_11 <- function(icd9Short, onlyReal) {
+    .Call(`_icd_icd9ChildrenShort_alt_11`, icd9Short, onlyReal)
+}
+
+#' C++ implementation of finding children of short codes
+#' @examples
+#' \dontrun{
+#' library(microbenchmark)
+#' microbenchmark(icd9ChildrenShort("001", T), icd9ChildrenShortStd("001", T), times = 100)
+#' microbenchmark(icd9ChildrenShort(c("001", 100:400), T),
+#'                icd9ChildrenShortUnordered(c("001", 100:400), T),
+#'                icd9ChildrenShortStd(c("001", 100:400), T),
+#'                times = 10)
+#' }
+#' # un-ordered set much faster, but may still need to sort result
+#' @keywords internal
+icd9ChildrenShort_alt_Std <- function(icd9Short, onlyReal) {
+    .Call(`_icd_icd9ChildrenShort_alt_Std`, icd9Short, onlyReal)
+}
+
+icd9Children_alt_ShortNoNaUnordered <- function(icd9Short, onlyReal) {
+    .Call(`_icd_icd9Children_alt_ShortNoNaUnordered`, icd9Short, onlyReal)
 }
 
 trimLeftCpp <- function(s) {

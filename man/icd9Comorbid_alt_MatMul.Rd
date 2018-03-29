@@ -20,13 +20,15 @@ However, with the (small) Vermont data, we see ~15,000 codes being reduced to
 }
 \examples{
 # show how many discrete ICD codes there are in the AHRQ map, before reducing
-# to the number which actually appear in a group of patient visits
+# to the number which actually appear in a group of patient visitsben
 sapply(icd::icd9_map_ahrq, length) \%>\% sum
 icd_comorbid_ahrq(vermont_dx \%>\% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
 \dontrun{
 # to test this, remove _alt line in .Rbuildignore, then these will be available. Also, re-enable [[Rcpp::depen22ds(RcppEigen)]]
-icd_comorbid_ahrq(vermont_dx \%>\% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_MatMul)
-icd_comorbid_ahrq(vermont_dx \%>\% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_SparseOmp)
+microbenchmark::microbenchmark(
+  icd_comorbid_ahrq(vermont_dx \%>\% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_MatMul),
+  icd_comorbid_ahrq(vermont_dx \%>\% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp),
+  times = 25)
 }
 }
 \keyword{internal}
