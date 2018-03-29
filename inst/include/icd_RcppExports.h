@@ -231,11 +231,11 @@ namespace icd {
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
     }
 
-    inline IntegerMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp::List& icd9Mapping, const std::string visitId, const std::string icd9Field, const int threads = 8, const int chunk_size = 256, const int omp_chunk_size = 1, bool aggregate = true) {
+    inline LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp::List& icd9Mapping, const std::string visitId, const std::string icd9Field, const int threads = 8, const int chunk_size = 256, const int omp_chunk_size = 1, bool aggregate = true) {
         typedef SEXP(*Ptr_icd9Comorbid_alt_MatMul)(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
         static Ptr_icd9Comorbid_alt_MatMul p_icd9Comorbid_alt_MatMul = NULL;
         if (p_icd9Comorbid_alt_MatMul == NULL) {
-            validateSignature("IntegerMatrix(*icd9Comorbid_alt_MatMul)(const Rcpp::DataFrame&,const Rcpp::List&,const std::string,const std::string,const int,const int,const int,bool)");
+            validateSignature("LogicalMatrix(*icd9Comorbid_alt_MatMul)(const Rcpp::DataFrame&,const Rcpp::List&,const std::string,const std::string,const int,const int,const int,bool)");
             p_icd9Comorbid_alt_MatMul = (Ptr_icd9Comorbid_alt_MatMul)R_GetCCallable("icd", "_icd_icd9Comorbid_alt_MatMul");
         }
         RObject rcpp_result_gen;
@@ -247,7 +247,7 @@ namespace icd {
             throw Rcpp::internal::InterruptedException();
         if (rcpp_result_gen.inherits("try-error"))
             throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
-        return Rcpp::as<IntegerMatrix >(rcpp_result_gen);
+        return Rcpp::as<LogicalMatrix >(rcpp_result_gen);
     }
 
     inline Eigen::SparseMatrix<char, Eigen::RowMajor> lookupComorbid_alt_SparseOmp(const VecVecInt& vcdb, const VecVecInt& map) {

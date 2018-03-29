@@ -367,7 +367,7 @@ RcppExport SEXP _icd_buildVisitCodesVecSparse(SEXP icd9dfSEXP, SEXP visitIdSEXP,
     return rcpp_result_gen;
 }
 // icd9Comorbid_alt_MatMul
-IntegerMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp::List& icd9Mapping, const std::string visitId, const std::string icd9Field, const int threads, const int chunk_size, const int omp_chunk_size, bool aggregate);
+LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp::List& icd9Mapping, const std::string visitId, const std::string icd9Field, const int threads, const int chunk_size, const int omp_chunk_size, bool aggregate);
 static SEXP _icd_icd9Comorbid_alt_MatMul_try(SEXP icd9dfSEXP, SEXP icd9MappingSEXP, SEXP visitIdSEXP, SEXP icd9FieldSEXP, SEXP threadsSEXP, SEXP chunk_sizeSEXP, SEXP omp_chunk_sizeSEXP, SEXP aggregateSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -2345,7 +2345,7 @@ static int _icd_RcppExport_validate(const char* sig) {
         signatures.insert("void(*attr_decimal_diag)(Rcpp::RObject&,bool)");
         signatures.insert("void(*attr_short_diag)(Rcpp::RObject&,bool)");
         signatures.insert("void(*buildVisitCodesVecSparse)(const SEXP&,const std::string&,const std::string&,PtsSparse&,VecStr&,const bool)");
-        signatures.insert("IntegerMatrix(*icd9Comorbid_alt_MatMul)(const Rcpp::DataFrame&,const Rcpp::List&,const std::string,const std::string,const int,const int,const int,bool)");
+        signatures.insert("LogicalMatrix(*icd9Comorbid_alt_MatMul)(const Rcpp::DataFrame&,const Rcpp::List&,const std::string,const std::string,const int,const int,const int,bool)");
         signatures.insert("Eigen::SparseMatrix<char, Eigen::RowMajor>(*lookupComorbid_alt_SparseOmp)(const VecVecInt&,const VecVecInt&)");
         signatures.insert("SEXP(*icd9Comorbid_alt_SparseOmp)(const SEXP&,const Rcpp::List&,const std::string,const std::string,const int,const int,const int,bool)");
         signatures.insert("SEXP(*icd9ComorbidShortCpp)(const SEXP&,const Rcpp::List&,const std::string,const std::string,const int,const int,const int,bool)");

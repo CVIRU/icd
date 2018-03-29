@@ -16,20 +16,15 @@
 // along with icd. If not, see <http://www.gnu.org/licenses/>.
 
 // [[Rcpp::interfaces(r, cpp)]]
+#include "config.h"                            // for valgrind etc
+#include "local.h"                            // for VisLk
+#include "icd_types.h"                        // for VecInt, VecVecInt, VecV...
 #include <Rcpp.h>
-#include <Rcpp/r/headers.h>                   // for INTEGER, Rf_length, SEXP
 #include <map>                                // for _Rb_tree_iterator
 #include <string>                             // for string, basic_string
 #include <utility>                            // for make_pair, pair
 #include <vector>                             // for vector
-#include "Rcpp/as.h"                          // for as
-#include "Rcpp/vector/Vector.h"               // for Vector<>::const_iterator
-#include "Rcpp/vector/const_generic_proxy.h"  // for const_generic_proxy
-#include "Rcpp/vector/instantiation.h"        // for List
-#include "RcppCommon.h"                       // for Proxy_Iterator
-#include "icd_types.h"                        // for VecInt, VecVecInt, VecV...
-#include "local.h"                            // for VisLk
-#include "config.h"                            // for valgrind etc
+#include <cstring>
 extern "C" {
   #include "cutil.h"                            // for getRListOrDfElement
 }
@@ -78,7 +73,7 @@ void buildVisitCodesVec(const SEXP& icd9df,
   Rcpp::Rcout << "buildVisitCodes SEXP is STR\n";
 #endif
   visitIds.resize(vlen); // resize and trim at end, as alternative to reserve
-  const char* lastVisitId = "JJ94967295JJ"; // random
+  char* lastVisit = "JJ94967295JJ"; // random long string TODO: test consequences of going over length.
   int n;
   for (int i = 0; i != vlen; ++i) {
     const char* vi = CHAR(STRING_ELT(vsexp, i));
@@ -87,7 +82,7 @@ void buildVisitCodesVec(const SEXP& icd9df,
     Rcpp::Rcout << "building visit: it = " << i << ", id = " << vi << "\n";
     Rcpp::Rcout << "length vcdb = " << vcdb.size() << "\n";
 #endif
-    if (lastVisitId != vi) {
+    if (strcmp(lastVisit, vi) != 0) {
       // assume new visitId unless aggregating
       vcdb_new_idx = vcdb_max_idx + 1;
       if (aggregate) { // only use map if aggregating
@@ -114,7 +109,7 @@ void buildVisitCodesVec(const SEXP& icd9df,
       vcdb[vcdb_new_idx].reserve(approx_cmb_per_visit);
       vcdb[vcdb_new_idx].push_back(n); // augment vec for current visit
       visitIds[vcdb_new_idx] = vi; // this now seems wasteful having a map AND a vector of these.
-      lastVisitId = vi;
+      std::strcpy(lastVisit, vi);
       vcdb_last_idx = vcdb_new_idx;
       ++vcdb_max_idx;
     } else {

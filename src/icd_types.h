@@ -61,7 +61,7 @@ typedef Rcpp::CharacterVector CV;
 typedef int SparseValue;
 typedef Eigen::Triplet<SparseValue> Triplet;
 typedef Eigen::SparseMatrix<SparseValue, Eigen::RowMajor> PtsSparse;
-typedef Eigen::MatrixXi DenseMap;
+typedef Eigen::MatrixXi DenseMap; // col major unless otherwise stated, I think
 typedef std::pair<std::string, VecInt::size_type> VisLkPair;
 
 #endif

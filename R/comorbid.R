@@ -374,7 +374,7 @@ icd_comorbid_common <- function(x,
   x <- x[!is.na(fac), ]
 
   # again, R is very fast at creating factors from a known set of levels. Base
-  # `factor` doesn't sort the levels if the levels are given
+  # `factor` doesn't sort the levels if the levels are given.
   map <- lapply(map, function(y) {
     f <- factor_nosort(y, levels = relevant_codes)
     f[!is.na(f)]
