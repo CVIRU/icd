@@ -5,7 +5,7 @@
 \title{Internal function to calculate co-morbidities.}
 \usage{
 icd_comorbid_common(x, map, visit_name = NULL, icd_name, short_code,
-  short_map, return_df = FALSE, comorbid_fun = icd9ComorbidShortCpp, ...)
+  short_map, return_df = FALSE, comorbid_fun = icd9Comorbid_alt_MatMul, ...)
 }
 \arguments{
 \item{map}{list (or name of a list if character vector of length one is given

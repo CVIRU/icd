@@ -18,9 +18,26 @@ patients, this will be less effective as the long tail becomes apparent.
 However, with the (small) Vermont data, we see ~15,000 codes being reduced to
 339.
 }
+\section{Sparse matrices}{
+
+Using sparse matrices is another solution. Building
+the initial matrix may become a significant part of the calculation, but once
+done, the solution could be a simple matrix multiplication, which is
+potentially highly optimized (Eigen, BLAS, GPU, etc.)
+}
+
+\section{Eigen}{
+
+Eigen has parallel (non-GPU) optimized sparse row-major *
+dense matrix. Patients-ICD matrix must be the row-major sparse one, so the
+dense matrix is then the comorbidity map
+\url{https://eigen.tuxfamily.org/dox/TopicMultiThreading.html}
+}
+
 \examples{
 # show how many discrete ICD codes there are in the AHRQ map, before reducing
 # to the number which actually appear in a group of patient visitsben
+library(magrittr)
 sapply(icd::icd9_map_ahrq, length) \%>\% sum
 icd_comorbid_ahrq(vermont_dx \%>\% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
 \dontrun{
