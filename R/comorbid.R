@@ -297,7 +297,7 @@ icd_comorbid_common <- function(x,
                                 short_code,
                                 short_map,
                                 return_df = FALSE,
-                                comorbid_fun = icd9ComorbidShortCpp, ...) {
+                                comorbid_fun = icd9Comorbid_alt_MatMul, ...) {
   assert_data_frame(x, min.cols = 2, col.names = "unique")
   assert_list(map, any.missing = FALSE, min.len = 1, unique = TRUE, names = "unique")
   assert(check_string(visit_name), check_null(visit_name))
@@ -362,14 +362,16 @@ icd_comorbid_common <- function(x,
   fac <- factor(x[[icd_name]], levels = relevant_codes)
   x[[icd_name]] <- fac
   # get the visits where there is at least one code which is not in comorbidity
-  # map. This is the inverse of all the visits with codes with at least one non-NA value.
-  vtmp <- aggregate(
-    x[[icd_name]],
-    by = list(visit_name = x[[visit_name]]),
-    simplify = TRUE,
-    FUN = function(y) all(is.na(y))
-  )
-  visit_not_comorbid <- vtmp[vtmp$x, "visit_name"]
+  # map. many rows are NA, because most are NOT in comorbidity maps:
+  visit_not_comorbid <- x[!is.na(x[[icd_name]]), visit_name]
+
+  # vtmp <- aggregate(
+  #   x[[icd_name]],
+  #   by = list(visit_name = x[[visit_name]]),
+  #   simplify = TRUE,
+  #   FUN = function(y) all(is.na(y))
+  # )
+  # visit_not_comorbid <- vtmp[vtmp$x, visit_name]
 
   x <- x[!is.na(fac), ]
 

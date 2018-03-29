@@ -10,4 +10,4 @@ R CMD INSTALL -d \
   --library="$install_dir" \
   --install-tests \
   --no-docs \
-  "$(ls -t icd*.tar.gz icd*.tgz | head -1)"
+  "$(ls -t icd*gz | head -1)"

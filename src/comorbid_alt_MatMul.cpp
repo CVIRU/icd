@@ -27,7 +27,7 @@ using namespace Rcpp;
 void buildVisitCodesVecSparse(const SEXP& icd9df,
                               const std::string& visitId,
                               const std::string& icd9Field,
-                              PtsSparse& sparse_db,
+                              PtsSparse& visit_codes_sparse,
                               VecStr& visitIds, // will have to get this from sparse matrix at end, but needed?
                               const bool aggregate = true // remove or ignore
 ) {
@@ -53,8 +53,8 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
   VecVecIntSz vcdb_new_idx;
   VecVecIntSz vcdb_last_idx;
 
-  sparse_db.resize(vlen, numUniqueCodes); // overestimate badly to start
-  sparse_db.reserve(vlen); // but memory commitment is known and limited.
+  visit_codes_sparse.resize(vlen, numUniqueCodes); // overestimate badly to start
+  visit_codes_sparse.reserve(vlen); // but memory commitment is known and limited.
 
   std::vector<Triplet> visTriplets;
   visTriplets.reserve(vlen * 30); // overestimate codes per patient to avoid resizing while filling
@@ -62,7 +62,7 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
   // the result matrix size should have dimensions rows: number of unique
   // visitIds, cols: number of unique ICD codes.
   for (int i = 0; i != vlen; ++i) {
-#ifdef ICD_DEBUG_SETUP
+#ifdef ICD_DEBUG_SETUP_TRACE
     Rcpp::Rcout << "vcdb_max_idx: " << vcdb_max_idx <<
       " vcdb_new_idx: " << vcdb_new_idx <<
         " vcdb_last_idx: " <<  vcdb_last_idx << std::endl;
@@ -99,9 +99,9 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
   } // end loop through all visit-code input data
   UNPROTECT(2);
 
-  // sparse_db and visitIds are updated
-  sparse_db.setFromTriplets(visTriplets.begin(), visTriplets.end());
-  sparse_db.conservativeResize(vcdb_max_idx + 1, numUniqueCodes);
+  // visit_codes_sparse and visitIds are updated
+  visit_codes_sparse.setFromTriplets(visTriplets.begin(), visTriplets.end());
+  visit_codes_sparse.conservativeResize(vcdb_max_idx + 1, numUniqueCodes);
   visitIds.resize(vcdb_max_idx + 1); // we over-sized (not just over-reserved) so now we trim.
 }
 
@@ -115,12 +115,12 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
 //' patients, this will be less effective as the long tail becomes apparent.
 //' However, with the (small) Vermont data, we see ~15,000 codes being reduced to
 //' 339.
-//' @section Sparse matrices
+//' @section Sparse matrices:
 //' Using sparse matrices is another solution. Building
 //' the initial matrix may become a significant part of the calculation, but once
 //' done, the solution could be a simple matrix multiplication, which is
 //' potentially highly optimized (Eigen, BLAS, GPU, etc.)
-//' @section Eigen
+//' @section Eigen:
 //' Eigen has parallel (non-GPU) optimized sparse row-major *
 //' dense matrix. Patients-ICD matrix must be the row-major sparse one, so the
 //' dense matrix is then the comorbidity map
@@ -128,6 +128,7 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
 //' @examples
 //' # show how many discrete ICD codes there are in the AHRQ map, before reducing
 //' # to the number which actually appear in a group of patient visitsben
+//' library(magrittr)
 //' sapply(icd::icd9_map_ahrq, length) %>% sum
 //' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
 //' \dontrun{
@@ -144,6 +145,9 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
                                       const int threads = 8, const int chunk_size = 256,
                                       const int omp_chunk_size = 1, bool aggregate = true) {
   valgrindCallgrindStart(true);
+#ifdef ICD_DEBUG_SETUP
+  Rcpp::Rcout << "icd9Comorbid_alt_MatMul starting" << std::endl;
+#endif
   VecStr out_row_names; // size is reserved in buildVisitCodesVec
   // find eventual size of map matrix:
   size_t map_rows = 0; // count number of codes in each comorbidity (don't look for codes which fall in two categories...)
@@ -190,21 +194,21 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
 #endif
 
   // build the patient:icd matrix... can probably re-use and simplify the
-  PtsSparse sparse_db; // reservation and sizing done within next function
-  buildVisitCodesVecSparse(icd9df, visitId, icd9Field, sparse_db, out_row_names, aggregate);
+  PtsSparse visit_codes_sparse; // reservation and sizing done within next function
+  buildVisitCodesVecSparse(icd9df, visitId, icd9Field, visit_codes_sparse, out_row_names, aggregate);
 #ifdef ICD_DEBUG_SETUP
-  Rcpp::Rcout << " built the sparse matrix, rows:" << sparse_db.rows() <<
-    ", cols: " << sparse_db.cols() << std::endl;
+  Rcpp::Rcout << " built the sparse matrix, rows:" << visit_codes_sparse.rows() <<
+    ", cols: " << visit_codes_sparse.cols() << std::endl;
 
   // just for debugging, convert to dense to show contents:
     {
-      Eigen::MatrixXi dense = Eigen::MatrixXi(sparse_db);
-      Rcpp::Rcout << "sparse_db looks begins: " << std::endl <<
+      Eigen::MatrixXi dense = Eigen::MatrixXi(visit_codes_sparse);
+      Rcpp::Rcout << "visit_codes_sparse looks begins: " << std::endl <<
         dense.block<9, 15>(0, 0) << std::endl;
     }
 #endif
 
-    DenseMap result = sparse_db * map; // col major
+    DenseMap result = visit_codes_sparse * map; // col major
 
 #ifdef ICD_DEBUG_SETUP
     Rcpp::Rcout << " done matrix multiplication. Result has " <<
