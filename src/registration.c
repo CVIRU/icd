@@ -3,11 +3,12 @@
 #include <stdlib.h> // for NULL
 #include <R_ext/Rdynload.h>
 
-/* FIXME:
+/* FIXME: 
    Check these declarations against the C/Fortran source code.
 */
 
 /* .Call calls */
+extern SEXP _icd_buildVisitCodesVecSparse(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_debug_parallel();
 extern SEXP _icd_debug_parallel_env();
 extern SEXP _icd_fastIntToStringRcpp(SEXP);
@@ -40,7 +41,6 @@ extern SEXP _icd_icd9ChildrenShort_alt_11(SEXP, SEXP);
 extern SEXP _icd_icd9ChildrenShort_alt_Std(SEXP, SEXP);
 extern SEXP _icd_icd9ChildrenShortUnordered(SEXP, SEXP);
 extern SEXP _icd_icd9Comorbid_alt_MatMul(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP _icd_icd9Comorbid_alt_MatMul_direct(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9Comorbid_alt_Sparse(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9Comorbid_alt_SparseOmp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9Comorbid_alt_Taskloop(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -87,6 +87,7 @@ extern SEXP _icd_valgrindCallgrindStop();
 extern SEXP run_testthat_tests();
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_icd_buildVisitCodesVecSparse",              (DL_FUNC) &_icd_buildVisitCodesVecSparse,              6},
     {"_icd_debug_parallel",                        (DL_FUNC) &_icd_debug_parallel,                        0},
     {"_icd_debug_parallel_env",                    (DL_FUNC) &_icd_debug_parallel_env,                    0},
     {"_icd_fastIntToStringRcpp",                   (DL_FUNC) &_icd_fastIntToStringRcpp,                   1},
@@ -119,7 +120,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_icd_icd9ChildrenShort_alt_Std",             (DL_FUNC) &_icd_icd9ChildrenShort_alt_Std,             2},
     {"_icd_icd9ChildrenShortUnordered",            (DL_FUNC) &_icd_icd9ChildrenShortUnordered,            2},
     {"_icd_icd9Comorbid_alt_MatMul",               (DL_FUNC) &_icd_icd9Comorbid_alt_MatMul,               8},
-    {"_icd_icd9Comorbid_alt_MatMul_direct",               (DL_FUNC) &_icd_icd9Comorbid_alt_MatMul,               8},
     {"_icd_icd9Comorbid_alt_Sparse",               (DL_FUNC) &_icd_icd9Comorbid_alt_Sparse,               8},
     {"_icd_icd9Comorbid_alt_SparseOmp",            (DL_FUNC) &_icd_icd9Comorbid_alt_SparseOmp,            8},
     {"_icd_icd9Comorbid_alt_Taskloop",             (DL_FUNC) &_icd_icd9Comorbid_alt_Taskloop,             8},

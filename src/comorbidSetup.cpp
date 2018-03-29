@@ -20,6 +20,7 @@
 #include "local.h"                            // for VisLk
 #include "icd_types.h"                        // for VecInt, VecVecInt, VecV...
 #include <Rcpp.h>
+#include <algorithm>
 #include <map>                                // for _Rb_tree_iterator
 #include <string>                             // for string, basic_string
 #include <utility>                            // for make_pair, pair
@@ -73,7 +74,7 @@ void buildVisitCodesVec(const SEXP& icd9df,
   Rcpp::Rcout << "buildVisitCodes SEXP is STR\n";
 #endif
   visitIds.resize(vlen); // resize and trim at end, as alternative to reserve
-  char* lastVisit = "JJ94967295JJ"; // random long string TODO: test consequences of going over length.
+  std::string lastVisit = "ac474a402000c1e79c51c3682a952295da0eaa67"; // random long string. std::string probably slightly slower, but safe for arbitrary length visit ids.
   int n;
   for (int i = 0; i != vlen; ++i) {
     const char* vi = CHAR(STRING_ELT(vsexp, i));
@@ -82,7 +83,7 @@ void buildVisitCodesVec(const SEXP& icd9df,
     Rcpp::Rcout << "building visit: it = " << i << ", id = " << vi << "\n";
     Rcpp::Rcout << "length vcdb = " << vcdb.size() << "\n";
 #endif
-    if (strcmp(lastVisit, vi) != 0) {
+    if (lastVisit != vi) {
       // assume new visitId unless aggregating
       vcdb_new_idx = vcdb_max_idx + 1;
       if (aggregate) { // only use map if aggregating
@@ -109,7 +110,7 @@ void buildVisitCodesVec(const SEXP& icd9df,
       vcdb[vcdb_new_idx].reserve(approx_cmb_per_visit);
       vcdb[vcdb_new_idx].push_back(n); // augment vec for current visit
       visitIds[vcdb_new_idx] = vi; // this now seems wasteful having a map AND a vector of these.
-      std::strcpy(lastVisit, vi);
+      lastVisit = vi;
       vcdb_last_idx = vcdb_new_idx;
       ++vcdb_max_idx;
     } else {

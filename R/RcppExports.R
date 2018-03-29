@@ -121,7 +121,7 @@ buildVisitCodesVecSparse <- function(icd9df, visitId, icd9Field, sparse_db, visi
 #' sapply(icd::icd9_map_ahrq, length) %>% sum
 #' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
 #' \dontrun{
-#' # remove _alt line in .Rbuildignore, then these will be available. Also, re-enable [[Rcpp::depends(RcppEigen)]]
+#' # to test this, remove _alt line in .Rbuildignore, then these will be available. Also, re-enable [[Rcpp::depen22ds(RcppEigen)]]
 #' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_MatMul)
 #' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_SparseOmp)
 #' }
