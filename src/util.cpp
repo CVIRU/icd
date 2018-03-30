@@ -314,3 +314,27 @@ std::vector<std::size_t> icd9OrderCpp(VecStr x) {
 // }
 // return
 // }
+
+//' fast expand of logical matrix to add rows filled with false
+//' @examples
+//' nrow = 1e5
+//' a <- matrix(rnorm(nrow * 30) < 0.5, nrow = nrow, ncol = 30)
+//' identical(rbind(a, matrix(FALSE, nrow = 1e5, ncol = 30)), icd:::rbind_with_empty(a, nrow))
+//' microbenchmark::microbenchmark(
+//'   rbind(a, matrix(FALSE, nrow = 1e5, ncol = 30)),
+//'   icd:::rbind_with_empty(a, nrow))
+//' )
+//' @keywords internal
+// [[Rcpp::export]]
+Rcpp::LogicalMatrix rbind_with_empty(Rcpp::LogicalMatrix a, int b_rows) {
+  // start with empty matrix
+  Rcpp::LogicalMatrix out = Rcpp::no_init_matrix(a.rows() + b_rows, a.cols());
+  // loop col-wise will be much faster
+  for (int j = 0; j != a.cols(); ++j) {
+    for (int i = 0; i != a.rows(); ++i)
+      out(i, j) = a(i,j); // copy
+    for (int i = a.rows(); i != out.rows(); ++i)
+      out(i, j) = false; // fill
+  } // end j loop
+  return out;
+}

@@ -4673,7 +4673,7 @@ R_INCLUDE_DIR=`"${R_BIN}" --vanilla --slave -e "suppressWarnings(try(cat(Sys.get
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: getting path to test for testthat Catch headers" >&5
 $as_echo "$as_me: getting path to test for testthat Catch headers" >&6;}
-TESTTHAT_INCLUDE_DIR=`"${R_BIN}" --vanilla --slave -e "suppressWarnings(try(cat(tools::file_path_as_absolute(base::system.file(package='testthat','include','testthat',mustWork=FALSE))),silent=TRUE))"`
+TESTTHAT_INCLUDE_DIR=`"${R_BIN}" --vanilla --slave -e "suppressWarnings(try(cat(tools::file_path_as_absolute(base::system.file(package='testthat','include',mustWork=FALSE))),silent=TRUE))"`
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: getting path to test for Rcpp headers" >&5
 $as_echo "$as_me: getting path to test for Rcpp headers" >&6;}
@@ -4688,7 +4688,7 @@ echo "testthat include dir is $TESTTHAT_INCLUDE_DIR"
 echo "Rcpp include dir is $RCPP_INCLUDE_DIR"
 echo "RcppEigen include dir is $RCPPEIGEN_INCLUDE_DIR"
 
-CPPFLAGS="$CPPFLAGS -I$R_INCLUDE_DIR -I -I$TESTTHAT_INCLUDE_DIR -I$RCPPEIGEN_INCLUDE_DIR -I$RCPP_INCLUDE_DIR"
+CPPFLAGS="$CPPFLAGS -I$R_INCLUDE_DIR -I$TESTTHAT_INCLUDE_DIR -I$RCPPEIGEN_INCLUDE_DIR -I$RCPP_INCLUDE_DIR"
 for ac_header in testthat.h
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "testthat.h" "ac_cv_header_testthat_h" "$ac_includes_default"

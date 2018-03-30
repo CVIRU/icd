@@ -84,7 +84,7 @@ AC_MSG_NOTICE([getting path for R include dir])
 R_INCLUDE_DIR=`"${R_BIN}" --vanilla --slave -e "suppressWarnings(try(cat(Sys.getenv('R_INCLUDE_DIR')),silent=TRUE))"`
 
 AC_MSG_NOTICE([getting path to test for testthat Catch headers])
-TESTTHAT_INCLUDE_DIR=`"${R_BIN}" --vanilla --slave -e "suppressWarnings(try(cat(tools::file_path_as_absolute(base::system.file(package='testthat','include','testthat',mustWork=FALSE))),silent=TRUE))"`
+TESTTHAT_INCLUDE_DIR=`"${R_BIN}" --vanilla --slave -e "suppressWarnings(try(cat(tools::file_path_as_absolute(base::system.file(package='testthat','include',mustWork=FALSE))),silent=TRUE))"`
 
 AC_MSG_NOTICE([getting path to test for Rcpp headers])
 RCPP_INCLUDE_DIR=`"${R_BIN}" --vanilla --slave  -e "suppressWarnings(try(cat(tools::file_path_as_absolute(base::system.file(package='Rcpp','include',mustWork=FALSE))),silent=TRUE))"`
@@ -97,7 +97,7 @@ echo "testthat include dir is $TESTTHAT_INCLUDE_DIR"
 echo "Rcpp include dir is $RCPP_INCLUDE_DIR"
 echo "RcppEigen include dir is $RCPPEIGEN_INCLUDE_DIR"
 
-CPPFLAGS="$CPPFLAGS -I$R_INCLUDE_DIR -I -I$TESTTHAT_INCLUDE_DIR -I$RCPPEIGEN_INCLUDE_DIR -I$RCPP_INCLUDE_DIR"
+CPPFLAGS="$CPPFLAGS -I$R_INCLUDE_DIR -I$TESTTHAT_INCLUDE_DIR -I$RCPPEIGEN_INCLUDE_DIR -I$RCPP_INCLUDE_DIR"
 AC_CHECK_HEADERS([testthat.h])
 AC_CHECK_HEADERS([RcppEigen.h])
 

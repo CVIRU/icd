@@ -61,4 +61,6 @@ void my_concat (COCiter start, COCiter end, Oiter dest) {
   }
 }
 
+Rcpp::LogicalMatrix rbind_with_empty(Rcpp::LogicalMatrix a, int b_rows);
+
 #endif /* UTIL_H_ */

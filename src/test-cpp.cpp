@@ -217,5 +217,13 @@ context("test alternate zero-adding code") {
   }
 }
 
+context("rbind with an new empty logical matrix") {
+  test_that("rbind falses to a simple small matrix") {
+    Rcpp::LogicalMatrix a(6, 4, true);
+    LogicalMatrix b = rbind_with_empty(a, 2);
+    expect_true(b.rows() == 8);
+  }
+}
+
 // endif have testthat
 #endif

@@ -81,10 +81,9 @@ SEXP icd9ComorbidShortCpp(const SEXP& icd9df, const Rcpp::List& icd9Mapping,
   buildMap(icd9Mapping, map);
 
   const VecVecIntSz num_comorbid = map.size();
-  const VecVecIntSz num_visits = vcdb.size();
 
 #ifdef ICD_DEBUG_SETUP
-  Rcpp::Rcout << num_visits << " visits\n";
+  Rcpp::Rcout << vcdb.size() << " visits\n";
   Rcpp::Rcout << num_comorbid << " is num_comorbid\n";
 #endif
   VecInt out(vcdb.size() * map.size(), false);
@@ -106,7 +105,7 @@ Rcpp::Rcout << "converted from ComorbidOut to vec bool, so Rcpp can handle cast 
 #endif
 // matrix is just a vector with dimensions (and col major...) Hope this isn't a data copy.
 Rcpp::LogicalVector mat_out = Rcpp::wrap(intermed);
-mat_out.attr("dim") = Rcpp::Dimension((int) num_comorbid, (int) num_visits); // set dimensions in reverse (row major for parallel step)
+mat_out.attr("dim") = Rcpp::Dimension((int) num_comorbid, (int) vcdb.size()); // set dimensions in reverse (row major for parallel step)
 mat_out.attr("dimnames") = Rcpp::List::create(icd9Mapping.names(), out_row_names);
 // apparently don't need to set class as matrix here
 Rcpp::Function t("t"); // use R transpose - seems pretty fast

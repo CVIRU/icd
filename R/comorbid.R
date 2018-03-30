@@ -356,9 +356,8 @@ icd_comorbid_common <- function(x,
     unique(unlist(map, use.names = FALSE))
   )
 
-  # Internally, the \code{sort} is slow. 'fastmatch' inside factor creation
-  # would speed up the next step but is unstable, and this is not a bottleneck
-  # anyway.
+  # Internally, the \code{sort} is slow. This step is one of the slowest steps
+  # with very large numbers of patients. #TODO SLOW
   fac <- factor(x[[icd_name]], levels = relevant_codes)
   x[[icd_name]] <- fac
   # get the visits where there is at least one code which is not in comorbidity
@@ -384,6 +383,7 @@ icd_comorbid_common <- function(x,
 
   # We can now do pure integer matching for icd9 codes. The only string manip
   # becomes (optionally) defactoring the visit_name for the matrix row names.
+  # This is now insansely quick and not a bottleneck.
   mat_comorbid <- comorbid_fun(icd9df = x, icd9Mapping = map, visitId = visit_name,
                                icd9Field = icd_name,
                                threads = getOption("icd.threads", getOmpCores()),
@@ -391,7 +391,10 @@ icd_comorbid_common <- function(x,
                                omp_chunk_size = getOption("icd.omp_chunk_size", 1L),
                                aggregate = TRUE) # nolint
 
-  # replace dropped rows (which therefore have no comorbidities)
+  # replace dropped rows (which therefore have no comorbidities) TODO SLOW even
+  # just creating a large number of patients without comorbidities takes a long
+  # time, then also a long time to rbind them, then sort them. A lot of time is
+  # actually garbage collection.
   mat_not_comorbid <- matrix(data = FALSE,
                              nrow = length(visit_not_comorbid),
                              ncol = ncol(mat_comorbid),
