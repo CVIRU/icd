@@ -86,6 +86,10 @@ strip <- function(x, pattern = " ", use_bytes = TRUE)
 #' text containing \code{TRUE} and \code{FALSE} is inefficient. Convert to
 #' binary takes more R memory, but allows more compact output
 #' @param x \code{data.frame} which may contain logical fields
+#' @examples
+#' mat <- matrix(sample(c(TRUE, FALSE), size = 9, replace = TRUE), nrow = 3)
+#' mat
+#' icd:::logical_to_binary(mat)
 #' @return \code{data.frame} without logical fields
 #' @keywords internal manip logical
 logical_to_binary <- function(x) {

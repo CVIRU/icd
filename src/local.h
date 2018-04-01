@@ -55,15 +55,11 @@ extern "C" {
 #include <Rcpp.h>
 #include <RcppEigen.h> // also add LinkingTo element in DESCRIPTION to enable
 #include <Eigen/SparseCore>
-
-// using the typedef confuses Rcpp?
-//typedef Eigen::SparseMatrix<char, Eigen::RowMajor> SparseOut; // bool, char or int?
 // https://eigen.tuxfamily.org/dox/group__TutorialSparse.html
 typedef int SparseValue;
 typedef Eigen::Triplet<SparseValue> Triplet;
 typedef Eigen::SparseMatrix<SparseValue, Eigen::RowMajor> PtsSparse;
 typedef Eigen::MatrixXi DenseMap;
-
 #endif
 
 #if defined(ICD_VALGRIND) && defined(HAVE_VALGRIND_VALGRIND_H)

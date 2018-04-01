@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
 
-#' Download ahrq-css-icd-09 definition
+#' Download ahrq-ccs-icd-09 definition
 #' @template ccs-single
 #' @template offline
 #' @keywords internal

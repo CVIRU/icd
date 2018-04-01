@@ -11,6 +11,7 @@
 extern SEXP _icd_buildVisitCodesVecSparse(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_debug_parallel();
 extern SEXP _icd_debug_parallel_env();
+extern SEXP _icd_factor_fast(SEXP);
 extern SEXP _icd_fastIntToStringRcpp(SEXP);
 extern SEXP _icd_fastIntToStringStd(SEXP);
 extern SEXP _icd_getOmpCores();
@@ -76,6 +77,7 @@ extern SEXP _icd_lookupComorbid_alt_Sparse(SEXP, SEXP);
 extern SEXP _icd_lookupComorbid_alt_SparseOmp(SEXP, SEXP);
 extern SEXP _icd_lookupComorbidByChunkFor(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_randomMajorCpp(SEXP);
+extern SEXP _icd_rbind_with_empty(SEXP, SEXP);
 extern SEXP _icd_RcppExport_registerCCallable();
 extern SEXP _icd_setDecimalDiag(SEXP, SEXP);
 extern SEXP _icd_setShortDiag(SEXP, SEXP);
@@ -90,6 +92,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_icd_buildVisitCodesVecSparse",              (DL_FUNC) &_icd_buildVisitCodesVecSparse,              6},
     {"_icd_debug_parallel",                        (DL_FUNC) &_icd_debug_parallel,                        0},
     {"_icd_debug_parallel_env",                    (DL_FUNC) &_icd_debug_parallel_env,                    0},
+    {"_icd_factor_fast",                           (DL_FUNC) &_icd_factor_fast,                           1},
     {"_icd_fastIntToStringRcpp",                   (DL_FUNC) &_icd_fastIntToStringRcpp,                   1},
     {"_icd_fastIntToStringStd",                    (DL_FUNC) &_icd_fastIntToStringStd,                    1},
     {"_icd_getOmpCores",                           (DL_FUNC) &_icd_getOmpCores,                           0},
@@ -155,6 +158,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_icd_lookupComorbid_alt_SparseOmp",          (DL_FUNC) &_icd_lookupComorbid_alt_SparseOmp,          2},
     {"_icd_lookupComorbidByChunkFor",              (DL_FUNC) &_icd_lookupComorbidByChunkFor,              5},
     {"_icd_randomMajorCpp",                        (DL_FUNC) &_icd_randomMajorCpp,                        1},
+    {"_icd_rbind_with_empty",                      (DL_FUNC) &_icd_rbind_with_empty,                      2},
     {"_icd_RcppExport_registerCCallable",          (DL_FUNC) &_icd_RcppExport_registerCCallable,          0},
     {"_icd_setDecimalDiag",                        (DL_FUNC) &_icd_setDecimalDiag,                        2},
     {"_icd_setShortDiag",                          (DL_FUNC) &_icd_setShortDiag,                          2},

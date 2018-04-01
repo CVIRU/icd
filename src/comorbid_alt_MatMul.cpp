@@ -188,8 +188,9 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
   map.conservativeResize(row, map.cols()); // does this empty the data?!
 
 #ifdef ICD_DEBUG_SETUP
-  Rcpp::Rcout << "Map matrix begins: " << std::endl <<
-    map.block<16, 30>(15, 0) << std::endl;
+  if (map.rows() >= 4 && map.cols() >= 4)
+    Rcpp::Rcout << "Map matrix begins: " << std::endl <<
+      map.block<4, 4>(0, 0) << std::endl;
   // hmm map is sparser than the visit-icd codes, could have sparse map on left, and transposed visit-icd on right
   Rcpp::Rcout << "Map dense matrix rows: " <<
     map.rows() << ", and cols: " << map.cols() << std::endl;
@@ -205,19 +206,24 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
   // just for debugging, convert to dense to show contents:
     {
       Eigen::MatrixXi dense = Eigen::MatrixXi(visit_codes_sparse);
-      Rcpp::Rcout << "visit_codes_sparse looks begins: " << std::endl <<
-        dense.block<9, 15>(0, 0) << std::endl;
+      if (visit_codes_sparse.rows() >= 4 && visit_codes_sparse.cols() >= 4)
+        Rcpp::Rcout << "visit_codes_sparse looks begins: " << std::endl <<
+          dense.block<4, 4>(0, 0) << std::endl;
     }
 #endif
 
-    DenseMap result = visit_codes_sparse * map; // col major
+    if (visit_codes_sparse.cols() != map.rows())
+      Rcpp::stop("matrix multiplication won't work");
+
+    DenseMap result = visit_codes_sparse * map; // col major result
 
 #ifdef ICD_DEBUG_SETUP
     Rcpp::Rcout << " done matrix multiplication. Result has " <<
       "rows: " << result.rows() <<
         " and cols: " << result.cols() << std::endl;
-    Rcpp::Rcout << "matrix result begins: " << std::endl <<
-      result.block<9, 15>(0, 0) << std::endl;
+    if (result.rows() >= 4 && result.cols() >= 4)
+      Rcpp::Rcout << "matrix result begins: " << std::endl <<
+        result.block<9, 15>(0, 0) << std::endl;
 #endif
 
     Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic> result_bool = (result.array() != 0);
@@ -242,7 +248,6 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
     //
 
     valgrindCallgrindStop();
-    //LogicalMatrix mat_out_logical = Rcpp::ifelse(mat_out, true, false);
     return mat_out_bool;
 }
 

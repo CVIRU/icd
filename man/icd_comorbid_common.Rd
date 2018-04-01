@@ -50,29 +50,6 @@ called to do the comorbidity calculation}
 \description{
 This common comorbidity calculation code does not depend on ICD type. There
 is some type conversion so the map and input codes are all in 'short' format,
-fast factor generation, then fast comorbidity assignment. The trick is to
-reduce the problem by only looking up comorbidities for codes which actually
-appear in the data set.
-}
-\details{
-1. get list of ICD codes in the patient data, e.g. Vermont data has 1825, but
-e.g. only 336 which appear in AHRQ map.
-
-2. make the patient data ICD codes a factor (if not already)
-
-3. drop all elements of the comorbidity map which are not in the patient
-data, about 336 out of 15000 remain (using AHRQ map as example)
-
-4. drop all patient data where the ICD code is not in the comorbidity map
-
-4a. care here because we need to return blank rows where a patient already
-didn't have any comorbidities (from the map).
-
-4b. return either in same order provided (making sure we use 'aggregate' when
-calling C++ so there is only one result for each patient when there are
-out-of-order patients in the data)
-
-5. call the C++ making sure the map and patient icd codes share the same
-factor levels
+fast factor generation, then fast comorbidity assignment.
 }
 \keyword{internal}

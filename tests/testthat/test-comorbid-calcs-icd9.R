@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
 
-context("comorbidity calculations")
+context("ICD-9 comorbidity calculations")
 
 test_that("ahrq comorbidity mapping is applied correctly,
           all comorbidities in one patient, no abbrev, hier", {
@@ -342,7 +342,7 @@ test_that("get Charlson/Deyo comorbidities for a single patient", {
 test_that("if an ICD class is not specified for a data set, but is for a column therein,
           the correct method is dispatched", {
             mydf <- data.frame(visit_id = c("a", "b", "c"),
-                               icd9 = icd9cm(c("412.93", "441", "044.9")))
+                               icd9 = icd:::icd9cm(c("412.93", "441", "044.9")))
             expect_warning(icd9_comorbid_quan_elix(mydf), regexp = NA)
             expect_warning(icd9_comorbid_quan_deyo(mydf), regexp = NA)
             expect_warning(icd9_comorbid_elix(mydf), regexp = NA)

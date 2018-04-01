@@ -124,7 +124,7 @@ buildVisitCodesVecSparse <- function(icd9df, visitId, icd9Field, visit_codes_spa
 #' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
 #'
 #' # to test Eigen sparse calcs, remove _alt line in .Rbuildignore, then these will be available.
-#' Also, re-enable [[Rcpp::depen22ds(RcppEigen)]]
+#' Also, re-enable [[Rcpp::depends(RcppEigen)]]
 #' microbenchmark::microbenchmark(
 #'   icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_MatMul),
 #'   icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp),
@@ -610,6 +610,24 @@ icd9_order_cpp <- function(x) {
 #' @keywords internal
 rbind_with_empty <- function(a, b_rows) {
     .Call(`_icd_rbind_with_empty`, a, b_rows)
+}
+
+#' fast factor generation test
+#' @examples
+#' \dontrun{
+#' codes <- unname(unlist(icd9_map_ahrq))
+#' codes <- c(codes, icd:::randomMajorCpp(1e7))
+#' microbenchmark::microbenchmark(
+#'   icd:::factor_fast(codes),
+#'   icd:::factor_nosort(codes),
+#'   factor(codes),
+#'   times = 10
+#'   )
+#' # the R factor_nosort is about as fast as Rcpp version
+#' }
+#' @keywords internal
+factor_fast <- function(x) {
+    .Call(`_icd_factor_fast`, x)
 }
 
 # Register entry points for exported C++ functions

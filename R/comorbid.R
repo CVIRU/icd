@@ -263,29 +263,7 @@ icd9_comorbid <- function(x,
 #'
 #' This common comorbidity calculation code does not depend on ICD type. There
 #' is some type conversion so the map and input codes are all in 'short' format,
-#' fast factor generation, then fast comorbidity assignment. The trick is to
-#' reduce the problem by only looking up comorbidities for codes which actually
-#' appear in the data set.
-#'
-#' 1. get list of ICD codes in the patient data, e.g. Vermont data has 1825, but
-#' e.g. only 336 which appear in AHRQ map.
-#'
-#' 2. make the patient data ICD codes a factor (if not already)
-#'
-#' 3. drop all elements of the comorbidity map which are not in the patient
-#' data, about 336 out of 15000 remain (using AHRQ map as example)
-#'
-#' 4. drop all patient data where the ICD code is not in the comorbidity map
-#'
-#' 4a. care here because we need to return blank rows where a patient already
-#' didn't have any comorbidities (from the map).
-#'
-#' 4b. return either in same order provided (making sure we use 'aggregate' when
-#' calling C++ so there is only one result for each patient when there are
-#' out-of-order patients in the data)
-#'
-#' 5. call the C++ making sure the map and patient icd codes share the same
-#' factor levels
+#' fast factor generation, then fast comorbidity assignment.
 #' @inheritParams icd9_comorbid
 #' @param comorbid_fun function i.e. the function (not character string) to be
 #'   called to do the comorbidity calculation
@@ -310,8 +288,13 @@ icd_comorbid_common <- function(x,
 
   stopifnot(visit_name %in% names(x))
 
+  # TODO: if levels like 010 and 10 exists, then these get contracted by
+  # icd_decimal_to_short, making the results different if icd codes are short or
+  # not.
   if (!short_code)
     x[[icd_name]] <- icd_decimal_to_short(x[[icd_name]])
+  else
+    x[[icd_name]] <- icd9_add_leading_zeroes(x[[icd_name]], short_code = TRUE)
 
   map <- lapply(map, as_char_no_warn)
 
@@ -329,23 +312,21 @@ icd_comorbid_common <- function(x,
     empty_mat_out <- matrix(nrow = 0,
                             ncol = length(map),
                             dimnames = list(character(0), names(map)))
-    if (return_df) {
-      if (visit_was_factor)
-        rownm <- factor(character(0), levels = iv_levels)
-      else
-        rownm <- character(0)
-      df_out <- cbind(rownm, as.data.frame(empty_mat_out), stringsAsFactors = visit_was_factor)
-      names(df_out)[1] <- visit_name
-      rownames(df_out) <- NULL
-      return(df_out)
-    } else {
+    if (!return_df)
       return(empty_mat_out)
-    }
+    if (visit_was_factor)
+      row_names <- factor_nosort(character(0), levels = iv_levels)
+    else
+      row_names <- character(0)
+    df_out <- cbind(row_names, as.data.frame(empty_mat_out), stringsAsFactors = visit_was_factor)
+    names(df_out)[1] <- visit_name
+    rownames(df_out) <- NULL
+    return(df_out)
   }
 
   # may be slow for big data. `rle` might be quicker if we know that
   # patient-visit rows are always contiguous.
-  uniq_visits <- unique(x[[visit_name]])
+  uniq_visits <- unique(x[[visit_name]]) # factor or vector
   x[[visit_name]] <- as_char_no_warn(x[[visit_name]])
 
   # start with a factor for the icd codes in x, recode (and drop superfluous)
@@ -358,26 +339,18 @@ icd_comorbid_common <- function(x,
 
   # Internally, the \code{sort} is slow. This step is one of the slowest steps
   # with very large numbers of patients. #TODO SLOW
-  fac <- factor(x[[icd_name]], levels = relevant_codes)
-  x[[icd_name]] <- fac
+  x[[icd_name]] <- factor_nosort(x[[icd_name]], levels = relevant_codes)
   # get the visits where there is at least one code which is not in comorbidity
   # map. many rows are NA, because most are NOT in comorbidity maps:
-  visit_not_comorbid <- x[!is.na(x[[icd_name]]), visit_name]
 
-  # vtmp <- aggregate(
-  #   x[[icd_name]],
-  #   by = list(visit_name = x[[visit_name]]),
-  #   simplify = TRUE,
-  #   FUN = function(y) all(is.na(y))
-  # )
-  # visit_not_comorbid <- vtmp[vtmp$x, visit_name]
+  # but first keep track of the visits with no comorbidities in the given map
+  visit_not_comorbid <- x[is.na(x[[icd_name]]), visit_name]
+  # then drop the rows where the code was not in a map
+  x <- x[!is.na(x[[icd_name]]), ]
 
-  x <- x[!is.na(fac), ]
-
-  # again, R is very fast at creating factors from a known set of levels. Base
-  # `factor` doesn't sort the levels if the levels are given.
   map <- lapply(map, function(y) {
     f <- factor_nosort(y, levels = relevant_codes)
+    # drop map codes that were not in the input comorbidities
     f[!is.na(f)]
   })
 
@@ -405,17 +378,16 @@ icd_comorbid_common <- function(x,
   mat_new_row_order <- match(rownames(mat_comb), uniq_visits)
   mat <- mat_comb[mat_new_row_order,, drop = FALSE] #nolint
 
-  if (return_df) {
-    if (visit_was_factor)
-      rownm <- factor_nosort(x = rownames(mat), levels = iv_levels)
-    else
-      rownm <- rownames(mat)
-    df_out <- cbind(rownm, as.data.frame(mat), stringsAsFactors = visit_was_factor)
-    names(df_out)[1] <- visit_name
-    rownames(df_out) <- NULL
-    return(df_out)
-  }
-  mat
+  if (!return_df)
+    return(mat)
+  if (visit_was_factor)
+    row_names <- factor_nosort(x = rownames(mat), levels = iv_levels)
+  else
+    row_names <- rownames(mat)
+  df_out <- cbind(row_names, as.data.frame(mat), stringsAsFactors = visit_was_factor)
+  names(df_out)[1] <- visit_name
+  rownames(df_out) <- NULL
+  df_out
 }
 
 #' @rdname icd_comorbid

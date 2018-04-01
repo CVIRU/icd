@@ -506,7 +506,7 @@ test_that("github #34 - short and long custom map give different results", {
                      icd9 = c("1", "010", "10", "20"))
 
   mymaps <- list(jack = c("1", "2", "3"), alf = c("010", "20"))
-  mymapd <- lapply(mymaps, icd_short_to_decimal.icd9)
+  mymapd <- lapply(mymaps, icd:::icd_short_to_decimal.icd9)
 
   expect_identical(
     icd9_comorbid(mydf, map = mymaps, short_code = TRUE),

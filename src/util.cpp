@@ -338,3 +338,27 @@ Rcpp::LogicalMatrix rbind_with_empty(Rcpp::LogicalMatrix a, int b_rows) {
   } // end j loop
   return out;
 }
+
+//' fast factor generation test
+//' @examples
+//' \dontrun{
+//' codes <- unname(unlist(icd9_map_ahrq))
+//' codes <- c(codes, icd:::randomMajorCpp(1e7))
+//' microbenchmark::microbenchmark(
+//'   icd:::factor_fast(codes),
+//'   icd:::factor_nosort(codes),
+//'   factor(codes),
+//'   times = 10
+//'   )
+//' # the R factor_nosort is about as fast as Rcpp version
+//' }
+//' @keywords internal
+// [[Rcpp::export]]
+SEXP factor_fast( SEXP x ) {
+  switch( TYPEOF(x) ) {
+  case INTSXP: return fast_factor_template<INTSXP>(x);
+  case REALSXP: return fast_factor_template<REALSXP>(x);
+  case STRSXP: return fast_factor_template<STRSXP>(x);
+  }
+  return R_NilValue;
+}

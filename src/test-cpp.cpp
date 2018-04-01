@@ -1,3 +1,6 @@
+#include "config.h"
+#include "icd_types.h"
+#include "local.h"
 #include <Rcpp.h>
 #include "is.h"
 #include "manip.h"
@@ -5,7 +8,6 @@
 #include "util.h"
 #include "appendMinor.h"
 #include "convert.h"
-#include "config.h"
 
 #ifdef HAVE_TESTTHAT_H
 #include <testthat.h>
@@ -82,8 +84,8 @@ context("icd9ShortToPartsCpp") {
 
   test_that("icd9ShortToPartsCpp multiple inptus gives multiple NA values") {
     CV cv = CV::create("E3417824921",
-                                                             "E375801347",
-                                                             "E8319473422");
+                       "E375801347",
+                       "E8319473422");
     Rcpp::List out = icd9ShortToPartsCpp(cv, "");
 
     CV j = out["mjr"];
@@ -168,7 +170,7 @@ context("random data") {
   }
 }
 
-#ifdef ICD_DEBUG
+//#ifdef ICD_DEBUG
 context("MajMin to code") {
   test_that("differing lengths gives error") {
     CV mj = CV::create("100");
@@ -190,7 +192,7 @@ context("MajMin to code") {
     expect_error(icd9MajMinToCode(mj, mn, true));
   }
 }
-#endif // end debug-only block
+//#endif // end debug-only block
 
 context("add leading zeroes to major") {
   test_that("when major len is 0, result is empty") {
@@ -208,10 +210,10 @@ context("add leading zeroes to major") {
 
 context("test alternate zero-adding code") {
   test_that("when a code would be made ambiguous, don't change it") {
-    expect_true(Rcpp::as<std::string>(icd9AddLeadingZeroesDirect("E010", true)[0]) == "E010");
+    expect_true(Rcpp::as<std::string>(icd9AddLeadingZeroes_alt_Direct("E010", true)[0]) == "E010");
   }
   test_that("short E codes work") {
-    expect_true(Rcpp::as<std::string>(icd9AddLeadingZeroesDirect("E1", true)[0]) == "E001");
+    expect_true(Rcpp::as<std::string>(icd9AddLeadingZeroes_alt_Direct("E1", true)[0]) == "E001");
     //Rcpp::String e1 = icd9AddLeadingZeroes_alt_ShortSingle("E1");
     //expect_true(Rcpp::as<std::string>(CV::create(e1)) == "E001");
   }
@@ -219,8 +221,8 @@ context("test alternate zero-adding code") {
 
 context("rbind with an new empty logical matrix") {
   test_that("rbind falses to a simple small matrix") {
-    Rcpp::LogicalMatrix a(6, 4, true);
-    LogicalMatrix b = rbind_with_empty(a, 2);
+    Rcpp::LogicalMatrix a = Rcpp::LogicalMatrix(6, 4);
+    Rcpp::LogicalMatrix b = rbind_with_empty(a, 2);
     expect_true(b.rows() == 8);
   }
 }

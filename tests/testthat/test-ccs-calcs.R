@@ -17,7 +17,11 @@
 
 context("ahrq ccs calculations")
 
-test_that("ahrq css icd 9 is performing correctly", {
+test_that("icd9 CCS map is valid", {
+  expect_true(icd:::icd_is_valid.icd_comorbidity_map(icd9_map_single_ccs, short_code = TRUE))
+})
+
+test_that("ahrq ccs icd 9 is performing correctly", {
   test_df <-
     data.frame(
       visit_id = c("a", "b", "b", "c"),

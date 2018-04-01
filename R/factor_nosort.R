@@ -18,6 +18,13 @@
 #'   \code{sort(unique.default(x))}.
 #' @param labels A set of labels used to rename the levels, if desired.
 #' @examples
+#' x <- c("z", "a", "123")
+#' icd:::factor_nosort(x)
+#' # should return a factor without modification
+#' x <- as.factor(x)
+#' identical(icd:::factor_nosort(x), x)
+#' # unless the levels change:
+#' icd:::factor_nosort(x, levels = c("a", "z"))
 #' \dontrun{
 #' pts <- icd:::random_unordered_patients(1e7)
 #' u <- unique.default(pts$code)
@@ -38,9 +45,15 @@
 #'   sorted in advance, especially not for ICD-9 codes where a simple
 #'   alphanumeric sorting will likely be completely wrong.
 #' @keywords internal
-factor_nosort <- function(x, levels = NULL, labels = levels) {
-  if (is.factor(x)) return(x)
-  if (is.null(levels)) levels <- unique.default(x)
+factor_nosort <- function(x, levels, labels = levels, exclude = NA) {
+  if (missing(levels)) {
+    levels <- unique.default(x)
+  }
+  if (is.factor(x) && length(levels) == length(levels(x))) {
+    if (!missing(levels)) levels(x) <- levels
+    return(x)
+  }
+  levels <- levels[is.na(match(levels, exclude))]
   suppressWarnings(f <- match(x, levels))
   levels(f) <- as.character(labels)
   class(f) <- "factor"

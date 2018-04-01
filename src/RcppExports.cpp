@@ -2360,6 +2360,36 @@ RcppExport SEXP _icd_rbind_with_empty(SEXP aSEXP, SEXP b_rowsSEXP) {
     UNPROTECT(1);
     return rcpp_result_gen;
 }
+// factor_fast
+SEXP factor_fast(SEXP x);
+static SEXP _icd_factor_fast_try(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(factor_fast(x));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _icd_factor_fast(SEXP xSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_icd_factor_fast_try(xSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
 
 // validate (ensure exported C++ functions exist before calling them)
 static int _icd_RcppExport_validate(const char* sig) { 
@@ -2440,6 +2470,7 @@ static int _icd_RcppExport_validate(const char* sig) {
         signatures.insert("VecStr(*icd9_sort_cpp)(VecStr)");
         signatures.insert("std::vector<std::size_t>(*icd9_order_cpp)(VecStr)");
         signatures.insert("Rcpp::LogicalMatrix(*rbind_with_empty)(Rcpp::LogicalMatrix,int)");
+        signatures.insert("SEXP(*factor_fast)(SEXP)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -2521,6 +2552,7 @@ RcppExport SEXP _icd_RcppExport_registerCCallable() {
     R_RegisterCCallable("icd", "_icd_icd9_sort_cpp", (DL_FUNC)_icd_icd9SortCpp_try);
     R_RegisterCCallable("icd", "_icd_icd9_order_cpp", (DL_FUNC)_icd_icd9OrderCpp_try);
     R_RegisterCCallable("icd", "_icd_rbind_with_empty", (DL_FUNC)_icd_rbind_with_empty_try);
+    R_RegisterCCallable("icd", "_icd_factor_fast", (DL_FUNC)_icd_factor_fast_try);
     R_RegisterCCallable("icd", "_icd_RcppExport_validate", (DL_FUNC)_icd_RcppExport_validate);
     return R_NilValue;
 }
