@@ -188,11 +188,13 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
   map.conservativeResize(row, map.cols()); // does this empty the data?!
 
 #ifdef ICD_DEBUG_SETUP
-  if (map.rows() >= 4 && map.cols() >= 4)
-    Rcpp::Rcout << "Map matrix begins: " << std::endl <<
-      map.block<4, 4>(0, 0) << std::endl;
+  Rcpp::Rcout << "Map matrix:" << std::endl;
+    if (map.rows() >= 4 && map.cols() >= 4)
+      Rcpp::Rcout << map.block<4, 4>(0, 0) << std::endl;
+    else
+      Rcpp::Rcout << map << std::endl;
   // hmm map is sparser than the visit-icd codes, could have sparse map on left, and transposed visit-icd on right
-  Rcpp::Rcout << "Map dense matrix rows: " <<
+  Rcpp::Rcout << "Map matrix rows: " <<
     map.rows() << ", and cols: " << map.cols() << std::endl;
 #endif
 
@@ -200,15 +202,17 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
   PtsSparse visit_codes_sparse; // reservation and sizing done within next function
   buildVisitCodesVecSparse(icd9df, visitId, icd9Field, visit_codes_sparse, out_row_names, aggregate);
 #ifdef ICD_DEBUG_SETUP
-  Rcpp::Rcout << " built the sparse matrix, rows:" << visit_codes_sparse.rows() <<
+  Rcpp::Rcout << "Built the sparse matrix, rows:" << visit_codes_sparse.rows() <<
     ", cols: " << visit_codes_sparse.cols() << std::endl;
 
   // just for debugging, convert to dense to show contents:
     {
       Eigen::MatrixXi dense = Eigen::MatrixXi(visit_codes_sparse);
+      Rcpp::Rcout << "visit_codes_sparse:" << std::endl;
       if (visit_codes_sparse.rows() >= 4 && visit_codes_sparse.cols() >= 4)
-        Rcpp::Rcout << "visit_codes_sparse looks begins: " << std::endl <<
-          dense.block<4, 4>(0, 0) << std::endl;
+        Rcpp::Rcout << dense.block<4, 4>(0, 0) << std::endl;
+      else
+        Rcpp::Rcout << dense << std::endl;
     }
 #endif
 
@@ -221,9 +225,12 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
     Rcpp::Rcout << " done matrix multiplication. Result has " <<
       "rows: " << result.rows() <<
         " and cols: " << result.cols() << std::endl;
+    Rcpp::Rcout << "matrix result begins: " << std::endl;
     if (result.rows() >= 4 && result.cols() >= 4)
-      Rcpp::Rcout << "matrix result begins: " << std::endl <<
-        result.block<9, 15>(0, 0) << std::endl;
+        Rcpp::Rcout << result.block<9, 15>(0, 0) << std::endl;
+    else
+      Rcpp::Rcout << result << std::endl;
+
 #endif
 
     Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic> result_bool = (result.array() != 0);
