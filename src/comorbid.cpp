@@ -37,17 +37,12 @@ extern "C" {
 //' @description \code{\link{Rcpp}} approach to comorbidity assignment with
 //'   OpenMP and vector of integers strategy. It is very fast, and most time is
 //'   now spent setting up the data to be passed in.
-//' @param aggregate single logical value, if \code{TRUE}, then take (possible
-//'   much) more time to aggregate out-of-sequence visit IDs in the input
-//'   data.frame. If this is \code{FALSE}, then each contiguous group of visit
-//'   IDs will result in a row of comorbidities in the output data. If you know
-//'   whether your visit IDs are disordered, then use \code{TRUE}.
 //' @keywords internal
 // [[Rcpp::export]]
 SEXP icd9ComorbidShortCpp(const SEXP& icd9df, const Rcpp::List& icd9Mapping,
                           const std::string visitId, const std::string icd9Field,
                           const int threads = 8, const int chunk_size = 256,
-                          const int omp_chunk_size = 1, bool aggregate = true) {
+                          const int omp_chunk_size = 1) {
 
   valgrindCallgrindStart(false);
   debug_parallel_env();
@@ -74,7 +69,7 @@ SEXP icd9ComorbidShortCpp(const SEXP& icd9df, const Rcpp::List& icd9Mapping,
   UNPROTECT(1); // vsexp not used further
 
   // build structure of patient data
-  buildVisitCodesVec(icd9df, visitId, icd9Field, vcdb, out_row_names, aggregate);
+  buildVisitCodesVec(icd9df, visitId, icd9Field, vcdb, out_row_names);
 
   // build structure of comorbidity map data
   VecVecInt map;

@@ -23,13 +23,11 @@ using namespace Rcpp;
 
 // alternate version which builds a sparse matrix, row-major, which is good for
 // LHS of multrix multiplication in Eigen
-// [[Rcpp::export]]
 void buildVisitCodesVecSparse(const SEXP& icd9df,
                               const std::string& visitId,
                               const std::string& icd9Field,
                               PtsSparse& visit_codes_sparse,
-                              VecStr& visitIds, // will have to get this from sparse matrix at end, but needed?
-                              const bool aggregate = true // remove or ignore
+                              VecStr& visitIds // will have to get this from sparse matrix at end, but needed?
 ) {
   SEXP icds = PROTECT(getRListOrDfElement(icd9df, icd9Field.c_str())); // this is a factor
   SEXP vsexp = PROTECT(getRListOrDfElement(icd9df, visitId.c_str()));
@@ -71,29 +69,42 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
     n = INTEGER(icds)[i]; // ICD codes are in a factor, so get the integer index
 
     if (lastVisit != visit) {
-      // assume new visitId unless aggregating
-      vcdb_new_idx = vcdb_max_idx + 1;
-      if (aggregate) { // only use map if aggregating
-        VisLk::iterator found = vis_lookup.find(visit); // did we see this visit already? Get name-index pair.
-        if (found != vis_lookup.end()) { // we found the old visit
-          // we saved the index in the map, so use that to insert a triplet:
 #ifdef ICD_DEBUG_SETUP
-          Rcpp::Rcout << "Found " << found->first << " with row id: " << found->second << std::endl;
+      Rcpp::Rcout << "visit has changed" << std::endl;
 #endif
-          visTriplets.push_back(Triplet(found->second, n - 1, true));
-          continue; // and continue with next row
-        } else { // otherwise we found a new visitId, so add it to our lookup table
-          VisLkPair vis_lookup_pair = std::make_pair(visit, vcdb_new_idx);
-          vis_lookup.insert(vis_lookup_pair); // new visit, with associated position in vcdb
-        }
-      } // end if aggregate
-      // we didn't have an existing visitId, or we are just assuming visitIds are ordered (not aggregating)
+      vcdb_new_idx = vcdb_max_idx + 1;
+      VisLk::iterator found = vis_lookup.find(visit); // did we see this visit already? Get name-index pair.
+      if (found != vis_lookup.end()) { // we found the old visit
+        // we saved the index in the map, so use that to insert a triplet:
+#ifdef ICD_DEBUG_SETUP
+        Rcpp::Rcout << "Found " << found->first << " with row id: " << found->second << std::endl;
+#endif
+#ifdef ICD_DEBUG_SETUP_TRACE
+        Rcpp::Rcout << "adding true at index (" << found->second << ", " << n-1 << ")" << std::endl;
+#endif
+        visTriplets.push_back(Triplet(found->second, n - 1, true));
+        continue; // and continue with next row
+      } else { // otherwise we found a new visitId, so add it to our lookup table
+#ifdef ICD_DEBUG_SETUP
+        Rcpp::Rcout << "visit is new" << std::endl;
+#endif
+        VisLkPair vis_lookup_pair = std::make_pair(visit, vcdb_new_idx);
+        vis_lookup.insert(vis_lookup_pair); // new visit, with associated position in vcdb
+      }
+      // we didn't find an existing visitId
+#ifdef ICD_DEBUG_SETUP_TRACE
+      Rcpp::Rcout << "adding true at index (" << vcdb_new_idx << ", " << n-1 << ")" << std::endl;
+#endif
       visTriplets.push_back(Triplet(vcdb_new_idx, n - 1, true));
       visitIds[vcdb_new_idx] = visit; // keep list of visitIds in order encountered.
       lastVisit = visit;
       vcdb_last_idx = vcdb_new_idx;
       ++vcdb_max_idx;
     } else { // last visitId was the same as the current one, so we can skip all the logic
+#ifdef ICD_DEBUG_SETUP_TRACE
+      Rcpp::Rcout << "adding true at index (" << vcdb_last_idx << ", " << n-1 << ")" << std::endl;
+#endif
+
       visTriplets.push_back(Triplet(vcdb_last_idx, n - 1, true));
     }
   } // end loop through all visit-code input data
@@ -145,7 +156,7 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
 LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp::List& icd9Mapping,
                                       const std::string visitId, const std::string icd9Field,
                                       const int threads = 8, const int chunk_size = 256,
-                                      const int omp_chunk_size = 1, bool aggregate = true) {
+                                      const int omp_chunk_size = 1) {
   valgrindCallgrindStart(true);
 #ifdef ICD_DEBUG_SETUP
   Rcpp::Rcout << "icd9Comorbid_alt_MatMul starting" << std::endl;
@@ -189,10 +200,10 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
 
 #ifdef ICD_DEBUG_SETUP
   Rcpp::Rcout << "Map matrix:" << std::endl;
-    if (map.rows() >= 4 && map.cols() >= 4)
-      Rcpp::Rcout << map.block<4, 4>(0, 0) << std::endl;
-    else
-      Rcpp::Rcout << map << std::endl;
+  if (map.rows() >= 4 && map.cols() >= 4)
+    Rcpp::Rcout << map.block<4, 4>(0, 0) << std::endl;
+  else
+    Rcpp::Rcout << map << std::endl;
   // hmm map is sparser than the visit-icd codes, could have sparse map on left, and transposed visit-icd on right
   Rcpp::Rcout << "Map matrix rows: " <<
     map.rows() << ", and cols: " << map.cols() << std::endl;
@@ -200,7 +211,7 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
 
   // build the patient:icd matrix... can probably re-use and simplify the
   PtsSparse visit_codes_sparse; // reservation and sizing done within next function
-  buildVisitCodesVecSparse(icd9df, visitId, icd9Field, visit_codes_sparse, out_row_names, aggregate);
+  buildVisitCodesVecSparse(icd9df, visitId, icd9Field, visit_codes_sparse, out_row_names);
 #ifdef ICD_DEBUG_SETUP
   Rcpp::Rcout << "Built the sparse matrix, rows:" << visit_codes_sparse.rows() <<
     ", cols: " << visit_codes_sparse.cols() << std::endl;
@@ -227,7 +238,7 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
         " and cols: " << result.cols() << std::endl;
     Rcpp::Rcout << "matrix result begins: " << std::endl;
     if (result.rows() >= 4 && result.cols() >= 4)
-        Rcpp::Rcout << result.block<9, 15>(0, 0) << std::endl;
+      Rcpp::Rcout << result.block<9, 15>(0, 0) << std::endl;
     else
       Rcpp::Rcout << result << std::endl;
 

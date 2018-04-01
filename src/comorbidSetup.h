@@ -43,7 +43,6 @@ void buildVisitCodesVec(const SEXP& icd9df,
                         const std::string& visitId,
                         const std::string& icd9Field,
                         VecVecInt& vcdb,
-                        VecStr& visitIds,
-                        const bool aggregate = true);
+                        VecStr& visitIds);
 
 #endif /* COMORBIDSETUP_H_ */

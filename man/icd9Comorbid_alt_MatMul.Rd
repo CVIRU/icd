@@ -5,7 +5,7 @@
 \title{prototype to do entire comorbidity calculation as a matrix multiplication}
 \usage{
 icd9Comorbid_alt_MatMul(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L,
-  chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE)
+  chunk_size = 256L, omp_chunk_size = 1L)
 }
 \description{
 The problem is that the matrices could be huge: the patient-icd matrix would

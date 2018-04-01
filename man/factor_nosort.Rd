@@ -4,7 +4,7 @@
 \alias{factor_nosort}
 \title{Fast Factor Generation}
 \usage{
-factor_nosort(x, levels = NULL, labels = levels)
+factor_nosort(x, levels, labels = levels, exclude = NA)
 }
 \arguments{
 \item{x}{An object of atomic type \code{integer}, \code{numeric},
@@ -34,6 +34,13 @@ I don't think there is any requirement for factor levels to be
   alphanumeric sorting will likely be completely wrong.
 }
 \examples{
+x <- c("z", "a", "123")
+icd:::factor_nosort(x)
+# should return a factor without modification
+x <- as.factor(x)
+identical(icd:::factor_nosort(x), x)
+# unless the levels change:
+icd:::factor_nosort(x, levels = c("a", "z"))
 \dontrun{
 pts <- icd:::random_unordered_patients(1e7)
 u <- unique.default(pts$code)

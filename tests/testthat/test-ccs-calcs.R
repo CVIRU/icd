@@ -81,6 +81,39 @@ test_that("one code from each single level backwards with disordered visits", {
   # should be one for each (do this way to ignore the empty first group)
   expect_equal(sum(res), length(first_from_each))
 })
+
+test_that("smaller test case based on random input", {
+  small_ccs_df <- data.frame(
+    visit_id = c("b", "j", "b"),
+    icd9 = c("E8490", "E0000", "E9286")
+  )
+
+  # test_ccs_map <- icd9_map_single_ccs[282:284]
+  # test_ccs_map <- lapply(test_ccs_map, `[[`, 1)
+  #test_ccs_map <- lapply(test_ccs_map, as.character)
+  test_ccs_map <- list(`2619` = "E9286",
+                       `2620` = "E0000",
+                       `2621` = "E8490")
+  # this simple map results in the map being the identity matrix
+
+  expected_res <- matrix(byrow = TRUE,
+                         data = c(TRUE, FALSE, TRUE,
+                                  FALSE, TRUE, FALSE),
+                         nrow = 2, ncol = 3,
+                         dimnames = list(c("b", "j"),
+                                         c("2619", "2620", "2621"))
+                         )
+
+  res <- icd9_comorbid_ccs(small_ccs_df, map = test_ccs_map)
+  res2 <- icd9_comorbid_ccs(small_ccs_df, map = test_ccs_map, comorbid_fun = icd:::icd9ComorbidShortCpp)
+  # compare all three, for development only
+  expect_identical(res, expected_res)
+  expect_identical(res2, expected_res)
+  expect_identical(res, res2)
+  # should be one for each (do this way to ignore the empty first group)
+  expect_equal(sum(res), length(first_from_each))
+})
+
 test_that("ahrq ccs icd 9 is performing correctly", {
   test_df <-
     data.frame(

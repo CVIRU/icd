@@ -64,7 +64,7 @@ Eigen::SparseMatrix<char, Eigen::RowMajor>
 SEXP icd9Comorbid_alt_Sparse(const SEXP& icd9df, const Rcpp::List& icd9Mapping,
                              const std::string visitId, const std::string icd9Field,
                              const int threads = 8, const int chunk_size = 256,
-                             const int omp_chunk_size = 1, bool aggregate = true) {
+                             const int omp_chunk_size = 1) {
 
   valgrindCallgrindStart(false);
   VecStr out_row_names; // size is reserved in buildVisitCodesVec
@@ -76,7 +76,7 @@ SEXP icd9Comorbid_alt_Sparse(const SEXP& icd9df, const Rcpp::List& icd9Mapping,
     UNPROTECT(1); // vsexp
   }
   UNPROTECT(1); // vsexp not used further
-  buildVisitCodesVec(icd9df, visitId, icd9Field, vcdb, out_row_names, aggregate);
+  buildVisitCodesVec(icd9df, visitId, icd9Field, vcdb, out_row_names);
 
   VecVecInt map;
   buildMap(icd9Mapping, map);

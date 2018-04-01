@@ -69,9 +69,7 @@ icd_poa_choices <- c("yes", "no", "notYes", "notNo")
 #' @template visit_name
 #' @template icd_name
 #' @template short_code
-#' @param short_map Same as short, but applied to \code{map} instead of the data
-#'   frame of ICD codes, \code{x}. All the codes in a mapping should be of the
-#'   same type, i.e. short or decimal.
+#' @template short_map
 #' @details The order of visits may change depending on the original sequence,
 #'   and the underlying algorithm used. Usually this would be the order of the
 #'   first occurence of each visit/patient identifier.
@@ -462,20 +460,25 @@ icd10_comorbid_quan_deyo <- function(x, ..., abbrev_names = TRUE, hierarchy = TR
 
 #' @rdname icd_comorbid
 #' @template ccs-single
+#' @template mapping
+#' @template short_map
 #' @param lvl If multiple level CCS, then level must be selected as a number
 #'   between one and four.
 #' @export
-icd9_comorbid_ccs <- function(x, ..., single = TRUE, lvl = NULL ) {
+icd9_comorbid_ccs <- function(x, ...,
+                              single = TRUE,
+                              lvl = NULL,
+                              map = icd9_map_single_ccs,
+                              short_map = TRUE) {
   assert_flag(single)
   assert_int(lvl, lower = 1, upper = 4, null.ok = TRUE, na.ok = FALSE)
-  m <- icd9_map_single_ccs
   if (!single) {
     if (!is.null(lvl))
-      m <- icd9_map_multi_ccs[[paste0("lvl", lvl)]]
+      map <- icd9_map_multi_ccs[[paste0("lvl", lvl)]]
     else
       stop("If 'single' is false, then 'lvl' must be supplied as 1, 2, 3 or 4")
   }
-  icd9_comorbid(x, map = m, short_map = TRUE, ...)
+  icd9_comorbid(x, map = map, short_map = short_map, ...)
 }
 
 #' @rdname icd_comorbid

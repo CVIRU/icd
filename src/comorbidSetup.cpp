@@ -27,7 +27,7 @@
 #include <vector>                             // for vector
 #include <cstring>
 extern "C" {
-  #include "cutil.h"                            // for getRListOrDfElement
+#include "cutil.h"                            // for getRListOrDfElement
 }
 
 
@@ -53,8 +53,7 @@ void buildVisitCodesVec(const SEXP& icd9df,
                         const std::string& visitId,
                         const std::string& icd9Field,
                         VecVecInt& vcdb,
-                        VecStr& visitIds,
-                        const bool aggregate = true) {
+                        VecStr& visitIds) {
   SEXP icds = PROTECT(getRListOrDfElement(icd9df, icd9Field.c_str()));
   SEXP vsexp = PROTECT(getRListOrDfElement(icd9df, visitId.c_str()));
   const int approx_cmb_per_visit = 15; // just a moderate over-estimate
@@ -86,24 +85,18 @@ void buildVisitCodesVec(const SEXP& icd9df,
     if (lastVisit != vi) {
       // assume new visitId unless aggregating
       vcdb_new_idx = vcdb_max_idx + 1;
-      if (aggregate) { // only use map if aggregating
-        VisLk::iterator found = vis_lookup.find(vi);
-        if (found != vis_lookup.end()) {
-          vcdb[found->second].push_back(n); // found row, add a 'column'
+      VisLk::iterator found = vis_lookup.find(vi);
+      if (found != vis_lookup.end()) {
+        vcdb[found->second].push_back(n); // found row, add a 'column'
 #ifdef ICD_DEBUG_SETUP_TRACE
-          Rcpp::Rcout << "repeat key " << vi << " found at position " << vcdb_new_idx << "\n";
+        Rcpp::Rcout << "repeat key " << vi << " found at position " << vcdb_new_idx << "\n";
 #endif
-          continue;
-        } else {
-          vis_lookup.insert(
-            std::make_pair(vi, vcdb_new_idx)); // new visit, with associated position in vcdb
-#ifdef ICD_DEBUG_SETUP_TRACE
-          Rcpp::Rcout << "(aggregating) new key " << vi << "\n";
-#endif
-        }
+        continue;
       } else {
+        vis_lookup.insert(
+          std::make_pair(vi, vcdb_new_idx)); // new visit, with associated position in vcdb
 #ifdef ICD_DEBUG_SETUP_TRACE
-        Rcpp::Rcout << "(not aggregating) new key " << vi << "\n";
+        Rcpp::Rcout << "(aggregating) new key " << vi << "\n";
 #endif
       }
       // all code paths now add a new row
@@ -121,7 +114,10 @@ void buildVisitCodesVec(const SEXP& icd9df,
     }
   } // end loop through all visit-code input data
 #ifdef ICD_DEBUG_SETUP
-  Rcpp::Rcout << "visit map created\n";
+  Rcpp::Rcout << "visit map created" << std::endl;
+  for (const VecInt &v : vcdb) {
+    printIt(v);
+  }
 #endif
   UNPROTECT(2);
   vcdb.resize(vcdb_max_idx + 1); // we over-sized (not just over-reserved) so now we trim.

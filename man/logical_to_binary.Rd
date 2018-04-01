@@ -17,6 +17,11 @@ When saving data as text files for distribution, printing large amounts of
 text containing \code{TRUE} and \code{FALSE} is inefficient. Convert to
 binary takes more R memory, but allows more compact output
 }
+\examples{
+mat <- matrix(sample(c(TRUE, FALSE), size = 9, replace = TRUE), nrow = 3)
+mat
+icd:::logical_to_binary(mat)
+}
 \keyword{internal}
 \keyword{logical}
 \keyword{manip}

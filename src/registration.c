@@ -8,7 +8,6 @@
 */
 
 /* .Call calls */
-extern SEXP _icd_buildVisitCodesVecSparse(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_debug_parallel();
 extern SEXP _icd_debug_parallel_env();
 extern SEXP _icd_factor_fast(SEXP);
@@ -46,7 +45,7 @@ extern SEXP _icd_icd9Comorbid_alt_Sparse(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEX
 extern SEXP _icd_icd9Comorbid_alt_SparseOmp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9Comorbid_alt_Taskloop(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9Comorbid_alt_Taskloop2(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP _icd_icd9ComorbidShortCpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _icd_icd9ComorbidShortCpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9DecimalToPartsCpp(SEXP, SEXP);
 extern SEXP _icd_icd9DecimalToShort(SEXP);
 extern SEXP _icd_icd9ExpandMinor(SEXP, SEXP);
@@ -89,7 +88,6 @@ extern SEXP _icd_valgrindCallgrindStop();
 extern SEXP run_testthat_tests();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_icd_buildVisitCodesVecSparse",              (DL_FUNC) &_icd_buildVisitCodesVecSparse,              6},
     {"_icd_debug_parallel",                        (DL_FUNC) &_icd_debug_parallel,                        0},
     {"_icd_debug_parallel_env",                    (DL_FUNC) &_icd_debug_parallel_env,                    0},
     {"_icd_factor_fast",                           (DL_FUNC) &_icd_factor_fast,                           1},
@@ -127,7 +125,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_icd_icd9Comorbid_alt_SparseOmp",            (DL_FUNC) &_icd_icd9Comorbid_alt_SparseOmp,            8},
     {"_icd_icd9Comorbid_alt_Taskloop",             (DL_FUNC) &_icd_icd9Comorbid_alt_Taskloop,             8},
     {"_icd_icd9Comorbid_alt_Taskloop2",            (DL_FUNC) &_icd_icd9Comorbid_alt_Taskloop2,            8},
-    {"_icd_icd9ComorbidShortCpp",                  (DL_FUNC) &_icd_icd9ComorbidShortCpp,                  8},
+    {"_icd_icd9ComorbidShortCpp",                  (DL_FUNC) &_icd_icd9ComorbidShortCpp,                  7},
     {"_icd_icd9DecimalToPartsCpp",                 (DL_FUNC) &_icd_icd9DecimalToPartsCpp,                 2},
     {"_icd_icd9DecimalToShort",                    (DL_FUNC) &_icd_icd9DecimalToShort,                    1},
     {"_icd_icd9ExpandMinor",                       (DL_FUNC) &_icd_icd9ExpandMinor,                       2},

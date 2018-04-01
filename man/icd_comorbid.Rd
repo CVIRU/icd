@@ -22,7 +22,7 @@
 \title{Find comorbidities from ICD-9 codes.}
 \usage{
 icd9ComorbidShortCpp(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L,
-  chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE)
+  chunk_size = 256L, omp_chunk_size = 1L)
 
 icd_comorbid(x, map, ...)
 
@@ -52,7 +52,8 @@ icd10_comorbid_quan_deyo(x, ..., abbrev_names = TRUE, hierarchy = TRUE)
 
 icd10_comorbid_quan_deyo(x, ..., abbrev_names = TRUE, hierarchy = TRUE)
 
-icd9_comorbid_ccs(x, ..., single = TRUE, lvl = NULL)
+icd9_comorbid_ccs(x, ..., single = TRUE, lvl = NULL,
+  map = icd9_map_single_ccs, short_map = TRUE)
 
 icd_comorbid_ahrq(x, icd_name = get_icd_name(x), ...)
 
@@ -63,12 +64,6 @@ icd_comorbid_quan_elix(x, icd_name = get_icd_name(x), ...)
 icd_comorbid_quan_deyo(x, icd_name = get_icd_name(x), ...)
 }
 \arguments{
-\item{aggregate}{single logical value, if \code{TRUE}, then take (possible
-much) more time to aggregate out-of-sequence visit IDs in the input
-data.frame. If this is \code{FALSE}, then each contiguous group of visit
-IDs will result in a row of comorbidities in the output data. If you know
-whether your visit IDs are disordered, then use \code{TRUE}.}
-
 \item{map}{list (or name of a list if character vector of length one is given
 as argument) of the comorbidities with each top-level list item containing
 a vector of decimal ICD-9 codes. This is in the form of a list, with the
@@ -110,6 +105,17 @@ otherwise use multi level}
 
 \item{lvl}{If multiple level CCS, then level must be selected as a number
 between one and four.}
+
+\item{map}{named list containing vectors of ICD-9 codes. E.g. the AHRQ ICD-9
+comorbidities, contains \code{list(OBESE = c("2780", "27800", "27801",
+"27803", "V8554", "79391", "64910", "64911", "64912", "64913", "64914",
+"V8530", "V8531", "V8532", "V8533", "V8534", "V8535", "V8536", "V8537",
+"V8538", "V8539", "V8541", "V8542", "V8543", "V8544", "V8545" ), DEPRESS =
+c("3004", "30112", "3090", "3091", "311"))} amongst other longer groups.}
+
+\item{short_map}{Same as short, but applied to \code{map} instead of the data
+frame of ICD codes, \code{x}. All the codes in a mapping should be of the
+same type, i.e. short or decimal.}
 }
 \description{
 \code{\link{Rcpp}} approach to comorbidity assignment with

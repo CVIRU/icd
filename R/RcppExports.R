@@ -91,10 +91,6 @@ icd10cm_children_defined_cpp <- function(x) {
     .Call(`_icd_icd10cmChildrenDefined`, x)
 }
 
-buildVisitCodesVecSparse <- function(icd9df, visitId, icd9Field, visit_codes_sparse, visitIds, aggregate = TRUE) {
-    invisible(.Call(`_icd_buildVisitCodesVecSparse`, icd9df, visitId, icd9Field, visit_codes_sparse, visitIds, aggregate))
-}
-
 #' @title prototype to do entire comorbidity calculation as a matrix multiplication
 #' @description
 #' The problem is that the matrices could be huge: the patient-icd matrix would
@@ -131,8 +127,8 @@ buildVisitCodesVecSparse <- function(icd9df, visitId, icd9Field, visit_codes_spa
 #'   times = 25)
 #' }
 #' @keywords internal
-icd9Comorbid_alt_MatMul <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
-    .Call(`_icd_icd9Comorbid_alt_MatMul`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
+icd9Comorbid_alt_MatMul <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L) {
+    .Call(`_icd_icd9Comorbid_alt_MatMul`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size)
 }
 
 #' comorbidity search with sparse matrix result, OMP test version
@@ -147,22 +143,17 @@ lookupComorbid_alt_SparseOmp <- function(vcdb, map) {
 
 #' @describeIn icd9Comorbid_alt_Taskloop Sparse comorbidity results with Eigen
 #' @keywords internal
-icd9Comorbid_alt_SparseOmp <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
-    .Call(`_icd_icd9Comorbid_alt_SparseOmp`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
+icd9Comorbid_alt_SparseOmp <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L) {
+    .Call(`_icd_icd9Comorbid_alt_SparseOmp`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size)
 }
 
 #' @rdname icd_comorbid
 #' @description \code{\link{Rcpp}} approach to comorbidity assignment with
 #'   OpenMP and vector of integers strategy. It is very fast, and most time is
 #'   now spent setting up the data to be passed in.
-#' @param aggregate single logical value, if \code{TRUE}, then take (possible
-#'   much) more time to aggregate out-of-sequence visit IDs in the input
-#'   data.frame. If this is \code{FALSE}, then each contiguous group of visit
-#'   IDs will result in a row of comorbidities in the output data. If you know
-#'   whether your visit IDs are disordered, then use \code{TRUE}.
 #' @keywords internal
-icd9ComorbidShortCpp <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
-    .Call(`_icd_icd9ComorbidShortCpp`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
+icd9ComorbidShortCpp <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L) {
+    .Call(`_icd_icd9ComorbidShortCpp`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size)
 }
 
 #' core search for ICD code in a map
@@ -195,8 +186,8 @@ lookupComorbid_alt_Sparse <- function(vcdb, map) {
     .Call(`_icd_lookupComorbid_alt_Sparse`, vcdb, map)
 }
 
-icd9Comorbid_alt_Sparse <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
-    .Call(`_icd_icd9Comorbid_alt_Sparse`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
+icd9Comorbid_alt_Sparse <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L) {
+    .Call(`_icd_icd9Comorbid_alt_Sparse`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size)
 }
 
 #' alternate comorbidity search
@@ -226,14 +217,14 @@ lookupComorbid_alt_ByChunkForTaskloop <- function(vcdb, map, out) {
 #' identical(res1, res2)
 #'
 #' @keywords internal
-icd9Comorbid_alt_Taskloop <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
-    .Call(`_icd_icd9Comorbid_alt_Taskloop`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
+icd9Comorbid_alt_Taskloop <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L) {
+    .Call(`_icd_icd9Comorbid_alt_Taskloop`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size)
 }
 
 #' @describeIn icd9Comorbid_alt_Taskloop Taskloop but finish with R transpose
 #' @keywords internal
-icd9Comorbid_alt_Taskloop2 <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L, aggregate = TRUE) {
-    .Call(`_icd_icd9Comorbid_alt_Taskloop2`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size, aggregate)
+icd9Comorbid_alt_Taskloop2 <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L) {
+    .Call(`_icd_icd9Comorbid_alt_Taskloop2`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size)
 }
 
 icd9MajMinToCode_alt_Old <- function(mjr, mnr, isShort) {
