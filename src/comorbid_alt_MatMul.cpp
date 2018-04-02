@@ -185,23 +185,38 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
   std::unordered_set<int> map_lookup;
   map_lookup.reserve(map_rows); // overestimate slightly, most are not duplicated.
   for (List::const_iterator li = icd9Mapping.begin(); li != icd9Mapping.end(); ++li) {
+#ifdef ICD_DEBUG_SETUP_TRACE
+    Rcpp::Rcout << "working on map item: " << std::distance(icd9Mapping.begin(), li) << std::endl;
+#endif
+
     IntegerVector v = *li;
     for (IntegerVector::iterator vi = v.begin(); vi != v.end(); ++vi) {
+#ifdef ICD_DEBUG_SETUP_TRACE
+      Rcpp::Rcout << "working on vector item: " << std::distance(v.begin(), vi);
+      Rcpp::Rcout << " with row: " << row << std::endl;
+#endif
       int this_code_factor_number = *vi; // no need to cast
       // if we can't find the integer in the lookup, then we add row
       if (map_lookup.find(this_code_factor_number) == map_lookup.end()) {
+#ifdef ICD_DEBUG_SETUP_TRACE
+        Rcpp::Rcout << "not found in lookup, so adding to map" << std::endl;
+#endif
         map.coeffRef(row, std::distance(icd9Mapping.begin(), li)) = true; // coeffRef doesn't do bounds check
         map_lookup.insert(this_code_factor_number);
         ++row;
+      } else {
+#ifdef ICD_DEBUG_SETUP
+        Rcpp::Rcout << "found duplicate while building map" << std::endl;
+#endif
       }
     }
   }
-  map.conservativeResize(row, map.cols()); // does this empty the data?!
+  map.conservativeResize(row, map.cols()); // conservative resize to avoid emptying the matrix!
 
 #ifdef ICD_DEBUG_SETUP
   Rcpp::Rcout << "Map matrix:" << std::endl;
-  if (map.rows() >= 4 && map.cols() >= 4)
-    Rcpp::Rcout << map.block<4, 4>(0, 0) << std::endl;
+  if (map.rows() >= 5 && map.cols() >= 5)
+    Rcpp::Rcout << map.block<5, 5>(0, 0) << std::endl;
   else
     Rcpp::Rcout << map << std::endl;
   // hmm map is sparser than the visit-icd codes, could have sparse map on left, and transposed visit-icd on right
