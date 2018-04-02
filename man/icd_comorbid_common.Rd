@@ -4,8 +4,8 @@
 \alias{icd_comorbid_common}
 \title{Internal function to calculate co-morbidities.}
 \usage{
-icd_comorbid_common(x, map, visit_name = NULL, icd_name, short_code,
-  short_map, return_df = FALSE, comorbid_fun = icd9Comorbid_alt_MatMul, ...)
+icd_comorbid_common(x, map, visit_name = NULL, icd_name, return_df = FALSE,
+  comorbid_fun = icd9Comorbid_alt_MatMul, ...)
 }
 \arguments{
 \item{map}{list (or name of a list if character vector of length one is given
@@ -35,14 +35,6 @@ contains the ICD codes. This is a character vector of length one. If it is
 progressively less likely possibilities until it matches a single column.
 Failing this, it will take the first column in the data frame. Specifying
 the column using this argument avoids the guesswork.}
-
-\item{short_code}{single logical value which determines whether the ICD-9
-code provided is in short (\code{TRUE}) or decimal (\code{FALSE}) form.
-Where reasonable, this is guessed from the input data.}
-
-\item{short_map}{Same as short, but applied to \code{map} instead of the data
-frame of ICD codes, \code{x}. All the codes in a mapping should be of the
-same type, i.e. short or decimal.}
 
 \item{comorbid_fun}{function i.e. the function (not character string) to be
 called to do the comorbidity calculation}

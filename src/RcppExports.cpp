@@ -2414,9 +2414,9 @@ static int _icd_RcppExport_validate(const char* sig) {
         signatures.insert("std::string(*trimLeftCpp)(std::string)");
         signatures.insert("std::string(*strimCpp)(std::string)");
         signatures.insert("VecStr(*trimCpp)(VecStr)");
-        signatures.insert("int(*getOmpCores)()");
-        signatures.insert("int(*getOmpMaxThreads)()");
-        signatures.insert("int(*getOmpThreads)()");
+        signatures.insert("int(*get_omp_cores)()");
+        signatures.insert("int(*get_omp_max_threads)()");
+        signatures.insert("int(*get_omp_threads)()");
         signatures.insert("void(*debug_parallel_env)()");
         signatures.insert("void(*debug_parallel)()");
         signatures.insert("Rcpp::NumericVector(*randomMajorCpp)(int)");
@@ -2495,9 +2495,9 @@ RcppExport SEXP _icd_RcppExport_registerCCallable() {
     R_RegisterCCallable("icd", "_icd_trimLeftCpp", (DL_FUNC)_icd_trimLeftCpp_try);
     R_RegisterCCallable("icd", "_icd_strimCpp", (DL_FUNC)_icd_strimCpp_try);
     R_RegisterCCallable("icd", "_icd_trimCpp", (DL_FUNC)_icd_trimCpp_try);
-    R_RegisterCCallable("icd", "_icd_getOmpCores", (DL_FUNC)_icd_getOmpCores_try);
-    R_RegisterCCallable("icd", "_icd_getOmpMaxThreads", (DL_FUNC)_icd_getOmpMaxThreads_try);
-    R_RegisterCCallable("icd", "_icd_getOmpThreads", (DL_FUNC)_icd_getOmpThreads_try);
+    R_RegisterCCallable("icd", "_icd_get_omp_cores", (DL_FUNC)_icd_getOmpCores_try);
+    R_RegisterCCallable("icd", "_icd_get_omp_max_threads", (DL_FUNC)_icd_getOmpMaxThreads_try);
+    R_RegisterCCallable("icd", "_icd_get_omp_threads", (DL_FUNC)_icd_getOmpThreads_try);
     R_RegisterCCallable("icd", "_icd_debug_parallel_env", (DL_FUNC)_icd_debug_parallel_env_try);
     R_RegisterCCallable("icd", "_icd_debug_parallel", (DL_FUNC)_icd_debug_parallel_try);
     R_RegisterCCallable("icd", "_icd_randomMajorCpp", (DL_FUNC)_icd_randomMajorCpp_try);

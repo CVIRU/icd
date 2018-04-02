@@ -40,11 +40,11 @@ extern SEXP _icd_icd9ChildrenShort(SEXP, SEXP);
 extern SEXP _icd_icd9ChildrenShort_alt_11(SEXP, SEXP);
 extern SEXP _icd_icd9ChildrenShort_alt_Std(SEXP, SEXP);
 extern SEXP _icd_icd9ChildrenShortUnordered(SEXP, SEXP);
-extern SEXP _icd_icd9Comorbid_alt_MatMul(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP _icd_icd9Comorbid_alt_Sparse(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP _icd_icd9Comorbid_alt_SparseOmp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP _icd_icd9Comorbid_alt_Taskloop(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP _icd_icd9Comorbid_alt_Taskloop2(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _icd_icd9Comorbid_alt_MatMul(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _icd_icd9Comorbid_alt_Sparse(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _icd_icd9Comorbid_alt_SparseOmp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _icd_icd9Comorbid_alt_Taskloop(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _icd_icd9Comorbid_alt_Taskloop2(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9ComorbidShortCpp(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9DecimalToPartsCpp(SEXP, SEXP);
 extern SEXP _icd_icd9DecimalToShort(SEXP);
@@ -120,11 +120,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_icd_icd9ChildrenShort_alt_11",              (DL_FUNC) &_icd_icd9ChildrenShort_alt_11,              2},
     {"_icd_icd9ChildrenShort_alt_Std",             (DL_FUNC) &_icd_icd9ChildrenShort_alt_Std,             2},
     {"_icd_icd9ChildrenShortUnordered",            (DL_FUNC) &_icd_icd9ChildrenShortUnordered,            2},
-    {"_icd_icd9Comorbid_alt_MatMul",               (DL_FUNC) &_icd_icd9Comorbid_alt_MatMul,               8},
-    {"_icd_icd9Comorbid_alt_Sparse",               (DL_FUNC) &_icd_icd9Comorbid_alt_Sparse,               8},
-    {"_icd_icd9Comorbid_alt_SparseOmp",            (DL_FUNC) &_icd_icd9Comorbid_alt_SparseOmp,            8},
-    {"_icd_icd9Comorbid_alt_Taskloop",             (DL_FUNC) &_icd_icd9Comorbid_alt_Taskloop,             8},
-    {"_icd_icd9Comorbid_alt_Taskloop2",            (DL_FUNC) &_icd_icd9Comorbid_alt_Taskloop2,            8},
+    {"_icd_icd9Comorbid_alt_MatMul",               (DL_FUNC) &_icd_icd9Comorbid_alt_MatMul,               7},
+    {"_icd_icd9Comorbid_alt_Sparse",               (DL_FUNC) &_icd_icd9Comorbid_alt_Sparse,               7},
+    {"_icd_icd9Comorbid_alt_SparseOmp",            (DL_FUNC) &_icd_icd9Comorbid_alt_SparseOmp,            7},
+    {"_icd_icd9Comorbid_alt_Taskloop",             (DL_FUNC) &_icd_icd9Comorbid_alt_Taskloop,             7},
+    {"_icd_icd9Comorbid_alt_Taskloop2",            (DL_FUNC) &_icd_icd9Comorbid_alt_Taskloop2,            7},
     {"_icd_icd9ComorbidShortCpp",                  (DL_FUNC) &_icd_icd9ComorbidShortCpp,                  7},
     {"_icd_icd9DecimalToPartsCpp",                 (DL_FUNC) &_icd_icd9DecimalToPartsCpp,                 2},
     {"_icd_icd9DecimalToShort",                    (DL_FUNC) &_icd_icd9DecimalToShort,                    1},

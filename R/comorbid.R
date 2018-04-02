@@ -248,13 +248,20 @@ icd9_comorbid <- function(x,
   assert_flag(short_code)
   assert_flag(short_map)
 
-  # confirm class is ICD-9 so we dispatch correctly.
-  if (!is.icd9(x[[icd_name]]))
-    x[[icd_name]] <- icd9(x[[icd_name]])
+  # confirm class is ICD-9, and add leading zeroes if missing, and if levels
+  # like 010 and 10 exists, then these get contracted by icd_decimal_to_short,
+  # making the results different if icd codes are short or not.
+
+  x[[icd_name]] <- if (short_code)
+    icd9(icd9_add_leading_zeroes(x[[icd_name]], short_code = TRUE))
+  else
+    icd9(icd_decimal_to_short.icd9(x[[icd_name]]))
+
+  if (!short_map)
+    map <- lapply(map, icd_decimal_to_short)
 
   icd_comorbid_common(x = x, map = map, visit_name = visit_name,
-                      icd_name = icd_name, short_code = short_code,
-                      short_map = short_map, return_df = return_df, ...)
+                      icd_name = icd_name, return_df = return_df, ...)
 }
 
 #' Internal function to calculate co-morbidities.
@@ -270,8 +277,6 @@ icd_comorbid_common <- function(x,
                                 map,
                                 visit_name = NULL,
                                 icd_name,
-                                short_code,
-                                short_map,
                                 return_df = FALSE,
                                 comorbid_fun = icd9Comorbid_alt_MatMul, ...) {
   assert_data_frame(x, min.cols = 2, col.names = "unique")
@@ -281,23 +286,10 @@ icd_comorbid_common <- function(x,
   visit_name <- get_visit_name(x, visit_name)
   icd_name <- get_icd_name(x, icd_name)
   assert_string(visit_name)
-  assert_flag(short_code)
-  assert_flag(short_map)
 
   stopifnot(visit_name %in% names(x))
 
-  # TODO: if levels like 010 and 10 exists, then these get contracted by
-  # icd_decimal_to_short, making the results different if icd codes are short or
-  # not.
-  if (!short_code)
-    x[[icd_name]] <- icd_decimal_to_short(x[[icd_name]])
-  else
-    x[[icd_name]] <- icd9_add_leading_zeroes(x[[icd_name]], short_code = TRUE)
-
   map <- lapply(map, as_char_no_warn)
-
-  if (!short_map)
-    map <- lapply(map, icd_decimal_to_short)
 
   # we need to convert to string and group these anyway, and much easier and
   # pretty quick to do it here:
@@ -357,10 +349,10 @@ icd_comorbid_common <- function(x,
   # This is now insansely quick and not a bottleneck.
   mat_comorbid <- comorbid_fun(icd9df = x, icd9Mapping = map, visitId = visit_name,
                                icd9Field = icd_name,
-                               threads = getOption("icd.threads", getOmpCores()),
+                               threads = getOption("icd.threads", get_omp_cores()),
                                chunk_size = getOption("icd.chunk_size", 256L),
-                               omp_chunk_size = getOption("icd.omp_chunk_size", 1L),
-                               aggregate = TRUE) # nolint
+                               omp_chunk_size = getOption("icd.omp_chunk_size", 1L)
+  ) # nolint
 
   # replace dropped rows (which therefore have no comorbidities) TODO SLOW even
   # just creating a large number of patients without comorbidities takes a long

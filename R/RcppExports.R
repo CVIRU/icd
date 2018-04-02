@@ -522,15 +522,15 @@ trimCpp <- function(sv) {
     .Call(`_icd_trimCpp`, sv)
 }
 
-getOmpCores <- function() {
+get_omp_cores <- function() {
     .Call(`_icd_getOmpCores`)
 }
 
-getOmpMaxThreads <- function() {
+get_omp_max_threads <- function() {
     .Call(`_icd_getOmpMaxThreads`)
 }
 
-getOmpThreads <- function() {
+get_omp_threads <- function() {
     .Call(`_icd_getOmpThreads`)
 }
 

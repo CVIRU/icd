@@ -15,6 +15,36 @@
 # You should have received a copy of the GNU General Public License
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
 
+context("Generic comorbidity calculation, using alternative algos")
+
+test_that("smaller test case based on random input", {
+  small_ccs_df <- data.frame(
+    visit_id = c("p1", "p2", "p1"),
+    code = c("C", "B", "A")
+  )
+
+  small_ccs_map <- list(X = "C",
+                        Y = "B",
+                        Z = "A")
+  # this simple map results in the map being the identity matrix
+
+  expected_res <- matrix(byrow = TRUE,
+                         data = c(TRUE, FALSE, TRUE,
+                                  FALSE, TRUE, FALSE),
+                         nrow = 2, ncol = 3,
+                         dimnames = list(c("p1", "p2"),
+                                         c("X", "Y", "Z"))
+  )
+
+  res <- icd:::icd_comorbid_common(small_ccs_df, map = test_ccs_map, visit_name = "visit_id", icd_name = "code")
+  res2 <- icd:::icd_comorbid_common(small_ccs_df, map = test_ccs_map, visit_name = "visit_id", icd_name = "code",
+                                    comorbid_fun = icd:::icd9ComorbidShortCpp)
+  # compare all three ways, for development only
+  expect_identical(res, expected_res)
+  expect_identical(res2, expected_res)
+  expect_identical(res, res2)
+})
+
 context("ICD-9 comorbidity calculations")
 
 test_that("ahrq comorbidity mapping is applied correctly,

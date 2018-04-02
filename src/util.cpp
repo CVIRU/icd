@@ -78,7 +78,7 @@ void printCharVec(CV cv) {
 }
 #endif
 
-// [[Rcpp::export]]
+// [[Rcpp::export(get_omp_cores)]]
 int getOmpCores() {
   int cores = 0;
 #ifdef ICD_OPENMP
@@ -87,7 +87,7 @@ int getOmpCores() {
   return cores;
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(get_omp_max_threads)]]
 int getOmpMaxThreads() {
   int maxthreads = 0;
 #ifdef ICD_OPENMP
@@ -97,7 +97,7 @@ int getOmpMaxThreads() {
 }
 
 // https://stackoverflow.com/questions/43736622/which-openmp-schedule-am-i-running/43755259#43755259
-// [[Rcpp::export]]
+// [[Rcpp::export(get_omp_threads)]]
 int getOmpThreads() {
   int threads = 0;
 #ifdef ICD_OPENMP

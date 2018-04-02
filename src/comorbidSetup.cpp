@@ -114,7 +114,7 @@ void buildVisitCodesVec(const SEXP& icd9df,
     }
   } // end loop through all visit-code input data
 #ifdef ICD_DEBUG_SETUP
-  Rcpp::Rcout << "visit map created" << std::endl;
+  Rcpp::Rcout << "visit map created:" << std::endl;
   for (const VecInt &v : vcdb) {
     printIt(v);
   }

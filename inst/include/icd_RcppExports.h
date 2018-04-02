@@ -1142,17 +1142,17 @@ namespace icd {
         return Rcpp::as<VecStr >(rcpp_result_gen);
     }
 
-    inline int getOmpCores() {
-        typedef SEXP(*Ptr_getOmpCores)();
-        static Ptr_getOmpCores p_getOmpCores = NULL;
-        if (p_getOmpCores == NULL) {
-            validateSignature("int(*getOmpCores)()");
-            p_getOmpCores = (Ptr_getOmpCores)R_GetCCallable("icd", "_icd_getOmpCores");
+    inline int get_omp_cores() {
+        typedef SEXP(*Ptr_get_omp_cores)();
+        static Ptr_get_omp_cores p_get_omp_cores = NULL;
+        if (p_get_omp_cores == NULL) {
+            validateSignature("int(*get_omp_cores)()");
+            p_get_omp_cores = (Ptr_get_omp_cores)R_GetCCallable("icd", "_icd_get_omp_cores");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_getOmpCores();
+            rcpp_result_gen = p_get_omp_cores();
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -1161,17 +1161,17 @@ namespace icd {
         return Rcpp::as<int >(rcpp_result_gen);
     }
 
-    inline int getOmpMaxThreads() {
-        typedef SEXP(*Ptr_getOmpMaxThreads)();
-        static Ptr_getOmpMaxThreads p_getOmpMaxThreads = NULL;
-        if (p_getOmpMaxThreads == NULL) {
-            validateSignature("int(*getOmpMaxThreads)()");
-            p_getOmpMaxThreads = (Ptr_getOmpMaxThreads)R_GetCCallable("icd", "_icd_getOmpMaxThreads");
+    inline int get_omp_max_threads() {
+        typedef SEXP(*Ptr_get_omp_max_threads)();
+        static Ptr_get_omp_max_threads p_get_omp_max_threads = NULL;
+        if (p_get_omp_max_threads == NULL) {
+            validateSignature("int(*get_omp_max_threads)()");
+            p_get_omp_max_threads = (Ptr_get_omp_max_threads)R_GetCCallable("icd", "_icd_get_omp_max_threads");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_getOmpMaxThreads();
+            rcpp_result_gen = p_get_omp_max_threads();
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
@@ -1180,17 +1180,17 @@ namespace icd {
         return Rcpp::as<int >(rcpp_result_gen);
     }
 
-    inline int getOmpThreads() {
-        typedef SEXP(*Ptr_getOmpThreads)();
-        static Ptr_getOmpThreads p_getOmpThreads = NULL;
-        if (p_getOmpThreads == NULL) {
-            validateSignature("int(*getOmpThreads)()");
-            p_getOmpThreads = (Ptr_getOmpThreads)R_GetCCallable("icd", "_icd_getOmpThreads");
+    inline int get_omp_threads() {
+        typedef SEXP(*Ptr_get_omp_threads)();
+        static Ptr_get_omp_threads p_get_omp_threads = NULL;
+        if (p_get_omp_threads == NULL) {
+            validateSignature("int(*get_omp_threads)()");
+            p_get_omp_threads = (Ptr_get_omp_threads)R_GetCCallable("icd", "_icd_get_omp_threads");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_getOmpThreads();
+            rcpp_result_gen = p_get_omp_threads();
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();
