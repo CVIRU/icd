@@ -240,7 +240,7 @@ icd_comorbid_mat_to_df <- function(x, visit_name = "visit_id",
   assert_matrix(x, min.rows = 1, min.cols = 1, row.names = "named", col.names = "named")
   assert_string(visit_name)
   assert_flag(stringsAsFactors) # nolint
-  out <- data.frame(rownames(x), x, stringsAsFactors = stringsAsFactors) # nolint
+  out <- data.frame(rownames(x), x, stringsAsFactors = stringsAsFactors, row.names = NULL) # nolint
   names(out)[1] <- visit_name
   rownames(out) <- NULL
   out

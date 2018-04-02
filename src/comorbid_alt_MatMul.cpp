@@ -253,10 +253,9 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
         " and cols: " << result.cols() << std::endl;
     Rcpp::Rcout << "matrix result begins: " << std::endl;
     if (result.rows() >= 4 && result.cols() >= 4)
-      Rcpp::Rcout << result.block<9, 15>(0, 0) << std::endl;
+      Rcpp::Rcout << result.block<4, 4>(0, 0) << std::endl;
     else
       Rcpp::Rcout << result << std::endl;
-
 #endif
 
     Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic> result_bool = (result.array() != 0);
