@@ -323,8 +323,8 @@ icd_comorbid_common <- function(x,
   # icd codes in the mapping, then do very fast match on integer without need
   # for N, V or E distinction. Char to factor conversion in R is very fast.
   relevant_codes <- intersect(
-    unique(unlist(map, use.names = FALSE)),
-    unique(x[[icd_name]])
+    unlist(map, use.names = FALSE),
+    x[[icd_name]]
   )
 
   # Internally, the \code{sort} is slow. This step is one of the slowest steps
@@ -334,7 +334,7 @@ icd_comorbid_common <- function(x,
   # map. many rows are NA, because most are NOT in comorbidity maps:
 
   # but first keep track of the visits with no comorbidities in the given map
-  visit_not_comorbid <- x[is.na(x[[icd_name]]), visit_name]
+  visit_not_comorbid <- unique(x[is.na(x[[icd_name]]), visit_name])
   # then drop the rows where the code was not in a map
   x <- x[!is.na(x[[icd_name]]), ]
   # now make remove rows where there was both NA and a real code:
@@ -376,7 +376,9 @@ icd_comorbid_common <- function(x,
     row_names <- factor_nosort(x = rownames(mat), levels = iv_levels)
   else
     row_names <- rownames(mat)
-  df_out <- cbind(row_names, as.data.frame(mat), stringsAsFactors = visit_was_factor)
+  df_out <- cbind(row_names, as.data.frame(mat),
+                  stringsAsFactors = visit_was_factor,
+                  row.names = NULL)
   names(df_out)[1] <- visit_name
   rownames(df_out) <- NULL
   df_out

@@ -25,6 +25,11 @@
 #' identical(icd:::factor_nosort(x), x)
 #' # unless the levels change:
 #' icd:::factor_nosort(x, levels = c("a", "z"))
+#'
+#' # existing factor levels aren't re-ordered without also moving elements
+#' f <- factor(c("a", "b", "b", "c"))
+#' g <- icd:::factor_nosort(f, levels = c("a", "c", "b"))
+#' stopifnot(g[4] == "c")
 #' \dontrun{
 #' pts <- icd:::random_unordered_patients(1e7)
 #' u <- unique.default(pts$code)
@@ -49,10 +54,11 @@ factor_nosort <- function(x, levels, labels = levels, exclude = NA) {
   if (missing(levels)) {
     levels <- unique.default(x)
   }
-  if (is.factor(x) && length(levels) == length(levels(x))) {
-    if (!missing(levels)) levels(x) <- levels
-    return(x)
-  }
+  #if (is.factor(x) && length(levels) == length(levels(x))) {
+  #  if (!missing(levels)) levels(x) <- levels
+  #  return(x)
+  #}
+  # drop levels with no values
   levels <- levels[is.na(match(levels, exclude))]
   suppressWarnings(f <- match(x, levels))
   levels(f) <- as.character(labels)

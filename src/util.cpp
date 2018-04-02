@@ -322,7 +322,7 @@ std::vector<std::size_t> icd9OrderCpp(VecStr x) {
 //' identical(rbind(a, matrix(FALSE, nrow = 1e5, ncol = 30)), icd:::rbind_with_empty(a, nrow))
 //' microbenchmark::microbenchmark(
 //'   rbind(a, matrix(FALSE, nrow = 1e5, ncol = 30)),
-//'   icd:::rbind_with_empty(a, nrow))
+//'   icd:::rbind_with_empty(a, nrow)
 //' )
 //' @keywords internal
 // [[Rcpp::export]]

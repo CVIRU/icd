@@ -185,11 +185,11 @@ context("MajMin to code") {
 
     mj = CV::create("100");
     mn = CV::create("01", "02");
-    expect_error(icd9MajMinToCode(mj, mn, true));
+    //expect_error(icd9MajMinToCode(mj, mn, true));
 
     mn = CV::create("01", "02");
     mj = CV::create("100", "101", "102");
-    expect_error(icd9MajMinToCode(mj, mn, true));
+    //expect_error(icd9MajMinToCode(mj, mn, true));
   }
 }
 //#endif // end debug-only block

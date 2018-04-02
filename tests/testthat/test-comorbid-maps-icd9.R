@@ -678,14 +678,14 @@ test_that("failing example", {
 
 test_that("disordered visit_ids works by default", {
   set.seed(1441)
-  dat <- transform(test_twenty, visit_id = sample(visit_id))
+  rnd_ord <- sample(seq_along(test_twenty$visit_id))
+  dat <- test_twenty[rnd_ord, ]
   tres <- icd9_comorbid(dat, icd9_map_ahrq, icd_name = "icd9Code")
   cres <- icd9_comorbid(test_twenty, icd9_map_ahrq, icd_name = "icd9Code")
   expect_equal(dim(tres), dim(cres))
   expect_equal(sum(tres), sum(cres))
   expect_true(setequal(rownames(tres), rownames(cres)))
   expect_equal(colnames(tres), colnames(cres))
-
 })
 
 test_that("comorbidities created from source data frame coded as factors", {

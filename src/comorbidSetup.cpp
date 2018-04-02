@@ -64,13 +64,14 @@ void buildVisitCodesVec(const SEXP& icd9df,
   Rcpp::Rcout << "vcdb resized to length vlen = " << vlen << "\n";
 #endif
   vcdb.resize(vlen); // over-estimate and allocate all at once (alternative is to reserve)
-  VecVecIntSz vcdb_max_idx = -1; // we increment immediately to zero as first index
+  VecVecIntSz vcdb_max_idx = -1; // we increment immediately to zero as first index, although this is probably bad form because it is an unsigned value.
   VecVecIntSz vcdb_new_idx;
   // 2094967295 is a random number less than 2^31 (to avoid 32bit R build
   // warning) just to initialize: should always been initialized, though.
   VecVecIntSz vcdb_last_idx = 2094967295;
 #ifdef ICD_DEBUG_SETUP
   Rcpp::Rcout << "buildVisitCodes SEXP is STR\n";
+  Rcpp::Rcout << "length vcdb = " << vcdb.size() << "\n";
 #endif
   visitIds.resize(vlen); // resize and trim at end, as alternative to reserve
   std::string lastVisit = "ac474a402000c1e79c51c3682a952295da0eaa67"; // random long string. std::string probably slightly slower, but safe for arbitrary length visit ids.
@@ -80,10 +81,9 @@ void buildVisitCodesVec(const SEXP& icd9df,
     n = INTEGER(icds)[i];
 #ifdef ICD_DEBUG_SETUP_TRACE
     Rcpp::Rcout << "building visit: it = " << i << ", id = " << vi << "\n";
-    Rcpp::Rcout << "length vcdb = " << vcdb.size() << "\n";
 #endif
     if (lastVisit != vi) {
-      // assume new visitId unless aggregating
+      // don't assume new visit id, although this is now likely
       vcdb_new_idx = vcdb_max_idx + 1;
       VisLk::iterator found = vis_lookup.find(vi);
       if (found != vis_lookup.end()) {
@@ -96,7 +96,7 @@ void buildVisitCodesVec(const SEXP& icd9df,
         vis_lookup.insert(
           std::make_pair(vi, vcdb_new_idx)); // new visit, with associated position in vcdb
 #ifdef ICD_DEBUG_SETUP_TRACE
-        Rcpp::Rcout << "(aggregating) new key " << vi << "\n";
+        Rcpp::Rcout << "new key " << vi << "\n";
 #endif
       }
       // all code paths now add a new row

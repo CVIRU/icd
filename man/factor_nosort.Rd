@@ -41,6 +41,11 @@ x <- as.factor(x)
 identical(icd:::factor_nosort(x), x)
 # unless the levels change:
 icd:::factor_nosort(x, levels = c("a", "z"))
+
+# existing factor levels aren't re-ordered without also moving elements
+f <- factor(c("a", "b", "b", "c"))
+g <- icd:::factor_nosort(f, levels = c("a", "c", "b"))
+stopifnot(g[4] == "c")
 \dontrun{
 pts <- icd:::random_unordered_patients(1e7)
 u <- unique.default(pts$code)

@@ -36,8 +36,8 @@ test_that("smaller test case based on random input", {
                                          c("X", "Y", "Z"))
   )
 
-  res <- icd:::icd_comorbid_common(small_ccs_df, map = test_ccs_map, visit_name = "visit_id", icd_name = "code")
-  res2 <- icd:::icd_comorbid_common(small_ccs_df, map = test_ccs_map, visit_name = "visit_id", icd_name = "code",
+  res <- icd:::icd_comorbid_common(small_ccs_df, map = small_ccs_map, visit_name = "visit_id", icd_name = "code")
+  res2 <- icd:::icd_comorbid_common(small_ccs_df, map = small_ccs_map, visit_name = "visit_id", icd_name = "code",
                                     comorbid_fun = icd:::icd9ComorbidShortCpp)
   # compare all three ways, for development only
   expect_identical(res, expected_res)

@@ -596,7 +596,7 @@ icd9_order_cpp <- function(x) {
 #' identical(rbind(a, matrix(FALSE, nrow = 1e5, ncol = 30)), icd:::rbind_with_empty(a, nrow))
 #' microbenchmark::microbenchmark(
 #'   rbind(a, matrix(FALSE, nrow = 1e5, ncol = 30)),
-#'   icd:::rbind_with_empty(a, nrow))
+#'   icd:::rbind_with_empty(a, nrow)
 #' )
 #' @keywords internal
 rbind_with_empty <- function(a, b_rows) {
