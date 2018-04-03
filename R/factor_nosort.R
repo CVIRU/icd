@@ -54,10 +54,6 @@ factor_nosort <- function(x, levels, labels = levels, exclude = NA) {
   if (missing(levels)) {
     levels <- unique.default(x)
   }
-  #if (is.factor(x) && length(levels) == length(levels(x))) {
-  #  if (!missing(levels)) levels(x) <- levels
-  #  return(x)
-  #}
   # drop levels with no values
   levels <- levels[is.na(match(levels, exclude))]
   suppressWarnings(f <- match(x, levels))
