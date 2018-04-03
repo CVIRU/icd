@@ -16,7 +16,7 @@
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
 
 test_that("ICD-10 codes in uranium data are okay", {
-  expect_true(all(icd_is_valid.icd10(uranium_pathology$icd10)))
+  expect_true(all(icd_is_valid(uranium_pathology$icd10, short_code = FALSE)))
   skip("reinstate this test once ICD-10 WHO codes are available for comparison.
        Uranium Pathology data is not ICD-10-CM, but ICD-10 WHO.")
   expect_true(
