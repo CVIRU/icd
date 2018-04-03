@@ -81,7 +81,9 @@ attr_decimal_diag <- function(x, value = TRUE) {
     invisible(.Call(`_icd_setDecimalDiag`, x, value))
 }
 
-#' @rdname as.icd_short_diag
+#' Set short diagnosis flag in C++
+#' @param x Any R object
+#' @param value \code{TRUE} or \code{FALSE}
 #' @keywords internal attribute
 attr_short_diag <- function(x, value = TRUE) {
     invisible(.Call(`_icd_setShortDiag`, x, value))
@@ -89,6 +91,46 @@ attr_short_diag <- function(x, value = TRUE) {
 
 icd10cm_children_defined_cpp <- function(x) {
     .Call(`_icd_icd10cmChildrenDefined`, x)
+}
+
+#' @title prototype to do entire comorbidity calculation as a matrix multiplication
+#' @description
+#' The problem is that the matrices could be huge: the patient-icd matrix would
+#' be millions of patient rows, and ~15000 columns for all AHRQ comorbidities.
+#' @details
+#' Several ways of reducing the problem: firstly, as with existing code, we can
+#' drop any ICD codes from the map which are not in the patient data. With many
+#' patients, this will be less effective as the long tail becomes apparent.
+#' However, with the (small) Vermont data, we see ~15,000 codes being reduced to
+#' 339.
+#' @section Sparse matrices:
+#' Using sparse matrices is another solution. Building
+#' the initial matrix may become a significant part of the calculation, but once
+#' done, the solution could be a simple matrix multiplication, which is
+#' potentially highly optimized (Eigen, BLAS, GPU, etc.)
+#' @section Eigen:
+#' Eigen has parallel (non-GPU) optimized sparse row-major *
+#' dense matrix. Patients-ICD matrix must be the row-major sparse one, so the
+#' dense matrix is then the comorbidity map
+#' \url{https://eigen.tuxfamily.org/dox/TopicMultiThreading.html}
+#' @examples
+#' # show how many discrete ICD codes there are in the AHRQ map, before reducing
+#' # to the number which actually appear in a group of patient visitsben
+#' library(magrittr)
+#' sapply(icd::icd9_map_ahrq, length) %>% sum
+#' \dontrun{
+#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
+#'
+#' # to test Eigen sparse calcs, remove _alt line in .Rbuildignore, then these will be available.
+#' Also, re-enable [[Rcpp::depends(RcppEigen)]]
+#' microbenchmark::microbenchmark(
+#'   icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_MatMul),
+#'   icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp),
+#'   times = 25)
+#' }
+#' @keywords internal
+icd9Comorbid_alt_MatMul <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L) {
+    .Call(`_icd_icd9Comorbid_alt_MatMul`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size)
 }
 
 #' @rdname icd_comorbid
@@ -157,44 +199,8 @@ icd9Comorbid_alt_Taskloop2 <- function(icd9df, icd9Mapping, visitId, icd9Field, 
     .Call(`_icd_icd9Comorbid_alt_Taskloop2`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size)
 }
 
-#' @title prototype to do entire comorbidity calculation as a matrix multiplication
-#' @description
-#' The problem is that the matrices could be huge: the patient-icd matrix would
-#' be millions of patient rows, and ~15000 columns for all AHRQ comorbidities.
-#' @details
-#' Several ways of reducing the problem: firstly, as with existing code, we can
-#' drop any ICD codes from the map which are not in the patient data. With many
-#' patients, this will be less effective as the long tail becomes apparent.
-#' However, with the (small) Vermont data, we see ~15,000 codes being reduced to
-#' 339.
-#' @section Sparse matrices:
-#' Using sparse matrices is another solution. Building
-#' the initial matrix may become a significant part of the calculation, but once
-#' done, the solution could be a simple matrix multiplication, which is
-#' potentially highly optimized (Eigen, BLAS, GPU, etc.)
-#' @section Eigen:
-#' Eigen has parallel (non-GPU) optimized sparse row-major *
-#' dense matrix. Patients-ICD matrix must be the row-major sparse one, so the
-#' dense matrix is then the comorbidity map
-#' \url{https://eigen.tuxfamily.org/dox/TopicMultiThreading.html}
-#' @examples
-#' # show how many discrete ICD codes there are in the AHRQ map, before reducing
-#' # to the number which actually appear in a group of patient visitsben
-#' library(magrittr)
-#' sapply(icd::icd9_map_ahrq, length) %>% sum
-#' \dontrun{
-#' icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp)
-#'
-#' # to test Eigen sparse calcs, remove _alt line in .Rbuildignore, then these will be available.
-#' Also, re-enable [[Rcpp::depends(RcppEigen)]]
-#' microbenchmark::microbenchmark(
-#'   icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9Comorbid_alt_MatMul),
-#'   icd_comorbid_ahrq(vermont_dx %>% icd_wide_to_long, comorbid_fun = icd:::icd9ComorbidShortCpp),
-#'   times = 25)
-#' }
-#' @keywords internal
-icd9Comorbid_alt_MatMul <- function(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L, chunk_size = 256L, omp_chunk_size = 1L) {
-    .Call(`_icd_icd9Comorbid_alt_MatMul`, icd9df, icd9Mapping, visitId, icd9Field, threads, chunk_size, omp_chunk_size)
+icd9MajMinToCode_alt_Old <- function(mjr, mnr, isShort) {
+    .Call(`_icd_icd9MajMinToCode_alt_Old`, mjr, mnr, isShort)
 }
 
 #' @rdname convert
@@ -255,10 +261,6 @@ icd9_decimal_to_short_cpp <- function(x) {
 #' @keywords internal manip
 icd_get_major.icd9 <- function(x, short_code) {
     .Call(`_icd_icd9GetMajor`, x, short_code)
-}
-
-icd9MajMinToCode_alt_Old <- function(mjr, mnr, isShort) {
-    .Call(`_icd_icd9MajMinToCode_alt_Old`, mjr, mnr, isShort)
 }
 
 #' @name fastIntToString
@@ -346,6 +348,24 @@ icd_long_to_wide_cpp <- function(icd9df, visitId, icd9Field, aggregate = TRUE) {
     .Call(`_icd_icd9LongToWideCpp`, icd9df, visitId, icd9Field, aggregate)
 }
 
+#' Decompose a 'short' ICD code and insert the leading zeroes as needed.
+#'
+#' This should add leading zeroes when there is definitely no ambiguity,
+#' e.g. V1. However V10 should not be altered, because V010 is a different
+#' code. The goal is for this to be faster, but must be correct! Example in
+#' \code{manip.cpp} has the benchmark code.
+#' @keywords internal manip
+icd9AddLeadingZeroes_alt_ShortSingle <- function(x) {
+    .Call(`_icd_icd9AddLeadingZeroes_alt_ShortSingle`, x)
+}
+
+#' @describeIn icd9AddLeadingZeroes_alt_ShortSingle Directly apply
+#' icd9AddLeadingZeroesShortSingle to each code without separating into parts
+#' @keywords internal manip
+icd9_add_leading_zeroes_alt_cpp <- function(x, short_code) {
+    .Call(`_icd_icd9AddLeadingZeroes_alt_Direct`, x, short_code)
+}
+
 #' Simpler add leading zeroes without converting to parts and back
 #' @keywords internal manip
 icd9AddLeadingZeroesMajorSingle <- function(mjr) {
@@ -386,61 +406,6 @@ icd9_add_leading_zeroes_cpp <- function(x, short_code) {
     .Call(`_icd_icd9AddLeadingZeroes`, x, short_code)
 }
 
-#' Decompose a 'short' ICD code and insert the leading zeroes as needed.
-#'
-#' This should add leading zeroes when there is definitely no ambiguity,
-#' e.g. V1. However V10 should not be altered, because V010 is a different
-#' code. The goal is for this to be faster, but must be correct! Example in
-#' \code{manip.cpp} has the benchmark code.
-#' @keywords internal manip
-icd9AddLeadingZeroes_alt_ShortSingle <- function(x) {
-    .Call(`_icd_icd9AddLeadingZeroes_alt_ShortSingle`, x)
-}
-
-#' @describeIn icd9AddLeadingZeroes_alt_ShortSingle Directly apply
-#' icd9AddLeadingZeroesShortSingle to each code without separating into parts
-#' @keywords internal manip
-icd9_add_leading_zeroes_alt_cpp <- function(x, short_code) {
-    .Call(`_icd_icd9AddLeadingZeroes_alt_Direct`, x, short_code)
-}
-
-icd9ExpandMinorStd <- function(mnr, isE) {
-    .Call(`_icd_icd9ExpandMinorStd`, mnr, isE)
-}
-
-icd9_expand_minor_wrap <- function(mnr, isE) {
-    .Call(`_icd_icd9ExpandMinor`, mnr, isE)
-}
-
-icd9ChildrenShort <- function(icd9Short, onlyReal) {
-    .Call(`_icd_icd9ChildrenShort`, icd9Short, onlyReal)
-}
-
-icd9ChildrenShortUnordered <- function(icd9Short, onlyReal) {
-    .Call(`_icd_icd9ChildrenShortUnordered`, icd9Short, onlyReal)
-}
-
-icd9ChildrenDecimalCpp <- function(icd9Decimal, onlyReal) {
-    .Call(`_icd_icd9ChildrenDecimalCpp`, icd9Decimal, onlyReal)
-}
-
-icd9ChildrenCpp <- function(icd9, isShort, onlyReal = TRUE) {
-    .Call(`_icd_icd9ChildrenCpp`, icd9, isShort, onlyReal)
-}
-
-#' @title match ICD9 codes
-#' @description Finds children of \code{icd9Reference} and looks for \code{icd9} in the
-#'   resulting vector.
-#' @templateVar icd9AnyName "icd9,icd9Reference"
-#' @template icd9-any
-#' @template short_code
-#' @param isShortReference logical, see argument \code{short_code}
-#' @return logical vector
-#' @keywords internal
-icd_in_reference_code <- function(icd, icd_reference, short_code, short_reference = TRUE) {
-    .Call(`_icd_icd_in_reference_code`, icd, icd_reference, short_code, short_reference)
-}
-
 #' Find child codes from vector of ICD-9 codes.
 #'
 #' Pure C++11 implementation using \code{unordered set} to find children of
@@ -478,6 +443,43 @@ icd9ChildrenShort_alt_Std <- function(icd9Short, onlyReal) {
 
 icd9Children_alt_ShortNoNaUnordered <- function(icd9Short, onlyReal) {
     .Call(`_icd_icd9Children_alt_ShortNoNaUnordered`, icd9Short, onlyReal)
+}
+
+icd9ExpandMinorStd <- function(mnr, isE) {
+    .Call(`_icd_icd9ExpandMinorStd`, mnr, isE)
+}
+
+icd9_expand_minor_wrap <- function(mnr, isE) {
+    .Call(`_icd_icd9ExpandMinor`, mnr, isE)
+}
+
+icd9ChildrenShort <- function(icd9Short, onlyReal) {
+    .Call(`_icd_icd9ChildrenShort`, icd9Short, onlyReal)
+}
+
+icd9ChildrenShortUnordered <- function(icd9Short, onlyReal) {
+    .Call(`_icd_icd9ChildrenShortUnordered`, icd9Short, onlyReal)
+}
+
+icd9ChildrenDecimalCpp <- function(icd9Decimal, onlyReal) {
+    .Call(`_icd_icd9ChildrenDecimalCpp`, icd9Decimal, onlyReal)
+}
+
+icd9ChildrenCpp <- function(icd9, isShort, onlyReal = TRUE) {
+    .Call(`_icd_icd9ChildrenCpp`, icd9, isShort, onlyReal)
+}
+
+#' @title match ICD9 codes
+#' @description Finds children of \code{icd9Reference} and looks for \code{icd9} in the
+#'   resulting vector.
+#' @templateVar icd9AnyName "icd9,icd9Reference"
+#' @template icd9-any
+#' @template short_code
+#' @param isShortReference logical, see argument \code{short_code}
+#' @return logical vector
+#' @keywords internal
+icd_in_reference_code <- function(icd, icd_reference, short_code, short_reference = TRUE) {
+    .Call(`_icd_icd_in_reference_code`, icd, icd_reference, short_code, short_reference)
 }
 
 trimLeftCpp <- function(s) {

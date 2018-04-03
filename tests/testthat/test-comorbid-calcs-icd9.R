@@ -348,7 +348,8 @@ test_that("Charlson/Deyo comorbidities for a single patient", {
       class = "data.frame")
   )
 
-  expect_error( # why?
+  # expect no error!
+  expect_error(
     icd9_comorbid_quan_deyo(one_pt_two_icd9, short_code = FALSE, return_df = TRUE), NA)
 
   mydf <- data.frame(visit_id = c("a", "a"), icd9 = c("441", "412.93"))

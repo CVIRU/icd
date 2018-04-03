@@ -229,6 +229,13 @@ icd10_comorbid_parent_search_use_cpp <- function(x,
 
 #' @describeIn icd_comorbid Get comorbidities from \code{data.frame} of ICD-9
 #'   codes
+#' @param preclean single logical value, which, if \code{TRUE} causes ICD-9
+#'   'short' code input to be padded to correct three (or four for E code)
+#'   length before applying the comorbidity map. For very large data sets, e.g.
+#'   ten million rows, this is much slower than the comorbidity calculation. If
+#'   you know that the source ICD-9 codes are already well formed (or have
+#'   already run \code{icd9_add_leading_zeroes}), then \code{preclean} can be
+#'   set to \code{FALSE} to save time.
 #' @export
 icd9_comorbid <- function(x,
                           map,
@@ -236,7 +243,8 @@ icd9_comorbid <- function(x,
                           icd_name = NULL,
                           short_code = icd_guess_short(x, icd_name = icd_name),
                           short_map = icd_guess_short(map),
-                          return_df = FALSE, ...) {
+                          return_df = FALSE,
+                          preclean = TRUE, ...) {
   assert_data_frame(x, min.cols = 2, col.names = "unique")
   assert_list(map, any.missing = FALSE, min.len = 1, unique = TRUE, names = "unique")
   assert(check_string(visit_name), check_null(visit_name))
@@ -252,9 +260,10 @@ icd9_comorbid <- function(x,
   # like 010 and 10 exists, then these get contracted by icd_decimal_to_short,
   # making the results different if icd codes are short or not.
 
-  x[[icd_name]] <- if (short_code)
-    icd9(icd9_add_leading_zeroes(x[[icd_name]], short_code = TRUE))
-  else
+  if (short_code && preclean)
+    x[[icd_name]] <- icd9(icd9_add_leading_zeroes(x[[icd_name]], short_code = TRUE))
+
+  if (!short_code)
     icd9(icd_decimal_to_short.icd9(x[[icd_name]]))
 
   if (!short_map)
@@ -278,7 +287,8 @@ icd_comorbid_common <- function(x,
                                 visit_name = NULL,
                                 icd_name,
                                 return_df = FALSE,
-                                comorbid_fun = icd9Comorbid_alt_MatMul, ...) {
+                                comorbid_fun = icd9Comorbid_alt_MatMul,
+                                ...) {
   assert_data_frame(x, min.cols = 2, col.names = "unique")
   assert_list(map, any.missing = FALSE, min.len = 1, unique = TRUE, names = "unique")
   assert(check_string(visit_name), check_null(visit_name))

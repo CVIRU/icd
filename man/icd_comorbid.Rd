@@ -32,7 +32,8 @@ icd10_comorbid(x, map, visit_name = NULL, icd_name = NULL,
 
 icd9_comorbid(x, map, visit_name = NULL, icd_name = NULL,
   short_code = icd_guess_short(x, icd_name = icd_name),
-  short_map = icd_guess_short(map), return_df = FALSE, ...)
+  short_map = icd_guess_short(map), return_df = FALSE, preclean = TRUE,
+  ...)
 
 icd9_comorbid_ahrq(x, ..., abbrev_names = TRUE, hierarchy = TRUE)
 
@@ -99,6 +100,14 @@ Where reasonable, this is guessed from the input data.}
 \item{short_map}{Same as short, but applied to \code{map} instead of the data
 frame of ICD codes, \code{x}. All the codes in a mapping should be of the
 same type, i.e. short or decimal.}
+
+\item{preclean}{single logical value, which, if \code{TRUE} causes ICD-9
+'short' code input to be padded to correct three (or four for E code)
+length before applying the comorbidity map. For very large data sets, e.g.
+ten million rows, this is much slower than the comorbidity calculation. If
+you know that the source ICD-9 codes are already well formed (or have
+already run \code{icd9_add_leading_zeroes}), then \code{preclean} can be
+set to \code{FALSE} to save time.}
 
 \item{single}{a logical value, if \code{TRUE} then use single level CCS,
 otherwise use multi level}

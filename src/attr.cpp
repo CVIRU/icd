@@ -42,7 +42,9 @@ void setDecimalDiag(Rcpp::RObject& x, bool value = true) {
   x.attr("icd_short_diag") = !value;
 }
 
-//' @rdname as.icd_short_diag
+//' Set short diagnosis flag in C++
+//' @param x Any R object
+//' @param value \code{TRUE} or \code{FALSE}
 //' @keywords internal attribute
 // [[Rcpp::export(attr_short_diag)]]
 void setShortDiag(Rcpp::RObject& x, bool value = true) {

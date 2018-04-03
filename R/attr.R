@@ -48,18 +48,18 @@ is.icd_decimal_diag <- function(x, must_work = FALSE) {
 #' \code{FALSE}. There is no attribute named \code{icd_decimal_code}.
 #' @param x ICD data
 #' @param value True or false, default is \code{TRUE}
+#' @export
 #' @examples
 #' codes <- as.icd9(c("100.1", "441.3"))
 #' codes <- as.icd_decimal_diag(codes)
 #' codes
-#' @export
 as.icd_short_diag <- function(x, value = TRUE) {
   checkmate::assert_flag(value)
   attr(x, "icd_short_diag") <- value
   x
 }
 
-#' @rdname as.icd_short_diag
+#' @describeIn as.icd_short_diag Indicate data contains decimal format ICD codes
 #' @export
 as.icd_decimal_diag <- function(x, value = TRUE) {
   checkmate::assert_flag(value)
