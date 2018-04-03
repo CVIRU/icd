@@ -53,7 +53,7 @@ test_that("ahrq comorbidities found for test data", {
   }
 })
 
-test_that("ahrq comorbidities found for test data for multiple patients each with a different comorbidity", {
+test_that("ahrq cmb for many pts each with a diff cmb", {
   test_three <- test_two <- icd10_all_ahrq
   test_two$icd10_code <- paste0(icd10_all_ahrq$icd10_code, "J2")
   test_three$icd10_code <- paste0(icd10_all_ahrq$icd10_code,
@@ -81,7 +81,7 @@ test_that("ahrq comorbidities found for test data for multiple patients each wit
   }
 })
 
-test_that("comorbidity from single ICD-10 leaf or non-leaf code doesn't cause infinite recursion with Elix", {
+test_that("cmb from a ICD-10, no infinite recursion with Elix", {
   # this code I5020 is in all the maps for ICD-10
   for (code in c("I5020")) {
     for (class_fun in c("as.character", "as.icd10", "as.icd10cm")) {

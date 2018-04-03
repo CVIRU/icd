@@ -134,7 +134,7 @@ test_that("expand icd9 range definition", {
 
 })
 
-test_that("expand range defined by two four digit codes includes last code", {
+test_that("range of two four digit codes has last code", {
   expect_true("1991" %in% icd_expand_range(short_code = TRUE, "1960", "1991", defined = FALSE))
   expect_true("19919" %in% icd_expand_range(short_code = TRUE, "1960", "1991", defined = FALSE))
 })
@@ -254,7 +254,8 @@ test_that("range bugs", {
   expect_identical("042.11" %i9da% "042.13", icd9(as.icd_decimal_diag(c("042.11", "042.12", "042.13"))))
 })
 
-test_that("range doesn't include higher level parent github issue #14", {
+# github issue #14
+test_that("range doesn't include parent", {
   # by default, any code returned in a range should also have all of its
   # children, if any, in the range (whether including or excluding non-real.
   expect_false("0101" %in% ("01006" %i9sa% "01010"))
@@ -383,7 +384,7 @@ test_that("icd9 children short with valid input", {
   expect_equal_no_icd(icd_children.icd9(short_code = TRUE, "390", defined = TRUE), "390")
 })
 
-test_that("is_short doesn't cause error with icd_children when redundantly specified", {
+test_that("is_short ok with redundant icd_children", {
   expect_identical(
     icd_children("10201", defined = FALSE),
     icd_children("10201", short_code = TRUE, defined = FALSE)
@@ -443,7 +444,7 @@ test_that("icd_in_reference_code", {
                    c(TRUE, TRUE, FALSE))
 })
 
-test_that("icd_in_reference_code works for numeric codes with major < 100", {
+test_that("icd_in_reference_code works numeric codes, major < 100", {
   expect_true(icd_in_reference_code("001", "001", short_code = TRUE))
   expect_true(icd_in_reference_code("0011", "001", short_code = TRUE))
 })
@@ -562,7 +563,8 @@ test_that("remove ambiguous high-level codes at start of icd9 range expansion", 
   )
 })
 
-test_that("end of range expanded reaches same code as expansion of high level start code", {
+# end of range expanded reaches same code as expansion of high level start code
+test_that("subrange matches wider range", {
   expect_equivalent(
     icd9_expand_range_short("550", "5509", defined = TRUE, ex_ambig_start = TRUE, ex_ambig_end = FALSE),
     icd9(c("550", "5500", "55000", "55001", "55002", "55003", "5501", "55010", "55011", "55012", "55013",

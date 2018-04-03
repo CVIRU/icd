@@ -76,7 +76,7 @@ test_that("icd9 comorbidities correct, logical to binary ok", {
 })
 
 test_that("ahrq icd9 map recreated", {
-
+  skip("this is a very slow test")
 
   # skip this test if the file is not already in data-raw
   if (is.null(icd9_fetch_ahrq_sas(offline = TRUE)))

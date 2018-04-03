@@ -267,6 +267,7 @@ icd9_expand_range_worker <- function(start, end, lookup, defined,
     s_kids[!s_kids_in]
   }
 
+  # operate on the environment, works by side effects, not return value
   exclude_ambiguous_parent <- function(x, defined) {
     if (!is_parent(x, defined))
       return()

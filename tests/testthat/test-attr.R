@@ -1,8 +1,7 @@
 
 context("attributes")
 
-test_that("test that attribute is set by different mechanisms", {
-
+test_that("attribute is set by different mechanisms", {
   j <- "100"
   expect_false(is.icd_short_diag(j, must_work = TRUE))
   expect_false(is.icd_decimal_diag(j, must_work = TRUE))

@@ -438,6 +438,8 @@ generate_uranium_pathology <- function(save_data = TRUE, offline = TRUE) {
 
   uranium_pathology <- uranium_pathology[order(uranium_pathology["case"]), ]
 
+  uranium_pathology$icd10 <- icd10(uranium_pathology$icd10)
+
   row.names(uranium_pathology) <- 1:nrow(uranium_pathology)
 
   uranium_pathology <- as.icd_long_data(uranium_pathology)

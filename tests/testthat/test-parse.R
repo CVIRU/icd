@@ -207,7 +207,8 @@ if (rtf_year_ok(test_year)) {
     expect_identical(rtf[["294"]], "Persistent mental disorders due to conditions classified elsewhere")
   })
 
-  test_that("in rtf we didn't incorrectly assign fifth (or fourth?) digit codes which are not defined", {
+  # in rtf we didn't incorrectly assign fifth (or fourth?) digit codes which are not defined
+  test_that("correct assignment of undefined last digit codes", {
     # e.g. 640.01 exists but 640.02 doesn't, even though fifth-digits are defined for group from 0-4
     expect_false("640.02" %in% nrtf)
     # grep "\[[[:digit:]],.*\]" Dtab12.rtf

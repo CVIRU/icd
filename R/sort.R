@@ -59,9 +59,7 @@ icd_sort.icd10 <- function(x, short_code = NULL, ...) {
 #' @keywords internal
 #' @export
 icd_sort.icd9 <- function(x, short_code = icd_guess_short(x), ...) {
-  assert(check_factor(x), check_character(x))
-  assert_flag(short_code)
-
+  # no assertions here: they are slower than the actual sorting...
   y <- if (short_code)
     x
   else

@@ -17,6 +17,12 @@
 
 # nocov start
 
+slow_tests <- function(...) {
+  r <- as.data.frame(res <- devtools::test(reporter = testthat::ListReporter))
+  r[order(r$real, decreasing = T), c(1,3,11)] %>%  head(10)
+  invisible(res)
+}
+
 bench_omp_vec_int <- function(n = 4, np = 2, threads = 6, chunk_size = 32) {
   icd9df <- generate_random_pts(n, np = np)
   icd9ComorbidShort(icd9df = icd9df,
@@ -232,11 +238,6 @@ icd9_benchmark <- function() {
   n <- 1E7 # 10 million rows
 
   rpts <- generate_random_pts(n)
-
-  # run slow tests (these are now much much faster with C++ implementations)
-  res <- testthat::test_dir("tests/testthat/", filter = "slow", reporter = "list")
-  res <- as.data.frame(res)
-  print(res[order(res$real), c("test", "real")])
 
   tmp <- tempfile(fileext = ".Rprof")
   utils::Rprof(filename = tmp, line.profiling = TRUE, memory.profiling = TRUE)
