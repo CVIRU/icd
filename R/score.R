@@ -283,15 +283,15 @@ icd_count_codes_wide <- function(x,
 #' @template stringsAsFactors
 #' @template dotdotdot
 #' @examples
-#' mydf <- as.icd9(data.frame(visit_name = c("a", "b", "c"),
-#'                    icd9 = c("412.93", "441", "044.9")))
-#'
-#' cmb <- icd9_comorbid_quan_elix(mydf, short_code = FALSE, hierarchy = TRUE, return_df=TRUE)
-#' cmb
-#'
-#' icd_van_walraven_from_comorbid(cmb)
-#'
+#' mydf <- data.frame(visit_name = c("a", "b", "c"),
+#'                    icd9 = c("412.93", "441", "044.9"))
 #' icd_van_walraven(mydf)
+#' # or calculate comorbodities first:
+#' cmb <- icd9_comorbid_quan_elix(mydf, short_code = FALSE, hierarchy = TRUE)
+#' vwr <- icd_van_walraven_from_comorbid(cmb)
+#' stopifnot(identical(icd_van_walraven(mydf), vwr))
+#'
+#' # alternatively return as data frame in 'tidy' format
 #' icd_van_walraven(mydf, return_df = TRUE)
 #' @author wmurphyrd
 #' @references van Walraven C, Austin PC, Jennings A, Quan H, Forster AJ. A
