@@ -231,6 +231,19 @@ test_that("conflicting ICD type classes can be found", {
   expect_true(icd_classes_conflict(structure(list("V10", "A20"), class = c("icd9cm", "icd10", "list"))))
 })
 
+test_that("we can't set a data.frame to have a vector class", {
+  expect_error(as.icd9(data.frame()))
+  expect_error(as.icd9cm(data.frame()))
+  expect_error(as.icd10(data.frame()))
+  expect_error(as.icd10cm(data.frame()))
+
+  expect_error(as.icd9(vermont_dx))
+  expect_error(as.icd9cm(vermont_dx))
+
+  expect_error(as.icd10(uranium_pathology))
+  expect_error(as.icd10cm(uranium_pathology))
+})
+
 test_that("long vs wide data conflict identified", {
   v_bad <- vermont_dx
   class(v_bad) <- c(class(v_bad), "icd_long_data")

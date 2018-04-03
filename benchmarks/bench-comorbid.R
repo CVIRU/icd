@@ -14,9 +14,10 @@ huge_mixed_pts <- R.cache::loadCache(key = list("huge_mixed_pts"), suffix = "icd
 if (is.null(huge_mixed_pts)) {
   vt <- icd_wide_to_long(vermont_dx)[c("visit_id", "icd_code")]
   vts <- mefa:::rep.data.frame(vt, 10000)
-  rnd <- rnd[c("visit_id", "code")]
+  rnd <- ten_million_random_pts[c("visit_id", "code")]
   names(rnd) <- names(vts)
   huge_mixed_pts <- rbind(rnd, vts)
+  rm(list = c("rnd", "vts", "vt"))
   R.cache::saveCache(huge_mixed_pts, key = list("huge_mixed_pts"))
 }
 

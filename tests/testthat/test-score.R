@@ -253,7 +253,7 @@ test_that("icd_van_walraven comodbidity index and score", {
                              "261", "280.9", "275.2", "96.59", "V49.86", "V10.42", "276.8",
                              "710.4", "311", "041.12", "276.0", "790.92", "518.84", "552.21",
                              "V85.41", "278.01", "V15.82", "96.72", "070.70", "285.29", "276.3",
-                             "V66.7", "272.4", "790.92")) %>% icd9
+                             "V66.7", "272.4", "790.92"))
   expect_equivalent(icd_van_walraven(mydf, visit_name = "id", icd_name = "value"),
                     icd_van_walraven_from_comorbid(
                       icd9_comorbid_quan_elix(mydf, visit_id = "id", icd9Field = "value")))
@@ -267,7 +267,7 @@ test_that("icd_van_walraven comodbidity index and score", {
 })
 
 test_that("github issue #64 - quan revised charleson scores", {
-  mydf <- data.frame(visit_id = "a", icd9 = "250.0") %>% icd9
+  mydf <- data.frame(visit_id = "a", icd9 = "250.0")
   comorbids <- icd_comorbid_quan_deyo(mydf, isShort = FALSE, return_df = TRUE)
 
   ## test against a known score for a single comorbidity

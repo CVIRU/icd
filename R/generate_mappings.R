@@ -440,7 +440,7 @@ generate_uranium_pathology <- function(save_data = TRUE, offline = TRUE) {
 
   row.names(uranium_pathology) <- 1:nrow(uranium_pathology)
 
-  uranium_pathology <- as.icd10(as.icd_long_data(uranium_pathology))
+  uranium_pathology <- as.icd_long_data(uranium_pathology)
 
   if (save_data)
     save_in_data_dir(uranium_pathology)

@@ -121,7 +121,11 @@ icd_classes_ordered <- function(x) {
 #' attributes(x) <- list(icd_short_diag = NULL)
 #' x
 #'
-#' # despite exhortation to implement [<- etc, the following seems to work:
+#' # or this way:
+#' y <- as.icd_decimal_diag(as.icd10("A10.09"))
+#' y
+#' is.icd_short_diag(y)
+#'
 #' j <- as.icd_short_diag(as.icd10(c("A11", "B2222")))
 #' j[2] <- "C33"
 #' stopifnot(is.icd_short_diag(j))
@@ -144,6 +148,7 @@ icd9 <- function(x) {
 #' @rdname set_icd_class
 #' @export
 as.icd9 <- function(x) {
+  stopifnot(is.atomic(x))
   if (missing(x)) x <- character()
   icd_check_conflict_with_icd9(x)
   if (is.icd9(x)) return(x)
@@ -164,6 +169,7 @@ icd9cm <- function(x) {
 #' @rdname set_icd_class
 #' @export
 as.icd9cm <- function(x) {
+  stopifnot(is.atomic(x))
   if (missing(x)) x <- character()
   icd_check_conflict_with_icd9cm(x)
   if (inherits(x, "icd9") && inherits(x, "icd9cm")) return(x)
@@ -179,6 +185,7 @@ as.icd9cm <- function(x) {
 #' @rdname set_icd_class
 #' @export
 as.icd10 <- function(x) {
+  stopifnot(is.atomic(x))
   if (missing(x)) x <- character()
   icd_check_conflict_with_icd10(x)
   if (inherits(x, "icd10")) return(x)
@@ -199,6 +206,7 @@ icd10 <- function(x) {
 #' @rdname set_icd_class
 #' @export
 as.icd10cm <- function(x, short_code = NULL) {
+  stopifnot(is.atomic(x))
   if (missing(x)) x <- character()
   icd_check_conflict_with_icd10cm(x)
   if (inherits(x, "icd10cm")) return(x)
@@ -234,6 +242,7 @@ as.icd_long_data <- function(x) {
   # implement these methods: dim (gets you nrow and ncol), t, dimnames (gets you
   # rownames and colnames), dimnames<- (gets you colnames<-, rownames<-), cbind,
   # rbind."
+  stopifnot(is.data.frame(x) || is.matrix(x))
   assert_data_frame(x)
   if (is.icd_wide_data(x))
     warning("Setting 'icd_long_data' on a data.frame or matrix which already has 'icd_wide_data' class")
@@ -246,6 +255,7 @@ as.icd_long_data <- function(x) {
 #' @rdname set_icd_class
 #' @export
 as.icd_wide_data <- function(x) {
+  stopifnot(is.data.frame(x) || is.matrix(x))
   assert_data_frame(x)
   if (is.icd_long_data(x))
     warning("Setting 'icd_wide_data' on a data.frame or matrix which already has 'icd_long_data' class")
@@ -391,7 +401,7 @@ c.icd10 <- function(..., warn = FALSE) {
 #' @param x input data with list, vector, factor, and class set to an ICD type.
 #' @template dotdotdot
 #' @examples
-#' x <- as.icd9(list(my_codes = c("V10.1", "441.1")))
+#' x <- list(my_codes = as.icd9(c("V10.1", "441.1")))
 #' x[1]
 #' x[[1]]
 #' x[[1]][2]

@@ -50,15 +50,13 @@ test_that("wide data to long data", {
   expect_equivalent(icd_wide_to_long(widedf),
                     longdf)
 
+  # same with "" instead of NA.
   widedfempty <- data.frame(visit_id = c("a", "b", "c"),
                             icd9_001 = c("441", "4424", "441"),
                             icd9_002 = c("", "443", ""))
 
   expect_equivalent(icd_wide_to_long(widedfempty),
                     longdf)
-  expect_equal(icd_wide_to_long(widedfempty),
-               longdf)
-
 })
 
 test_that("matrix to data frame and back", {

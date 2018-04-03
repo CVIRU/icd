@@ -88,7 +88,11 @@ x
 attributes(x) <- list(icd_short_diag = NULL)
 x
 
-# despite exhortation to implement [<- etc, the following seems to work:
+# or this way:
+y <- as.icd_decimal_diag(as.icd10("A10.09"))
+y
+is.icd_short_diag(y)
+
 j <- as.icd_short_diag(as.icd10(c("A11", "B2222")))
 j[2] <- "C33"
 stopifnot(is.icd_short_diag(j))
