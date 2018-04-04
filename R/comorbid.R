@@ -312,8 +312,7 @@ icd_comorbid_common <- function(x,
     empty_mat_out <- matrix(nrow = 0,
                             ncol = length(map),
                             dimnames = list(character(0), names(map)))
-    if (!return_df)
-      return(empty_mat_out)
+    if (!return_df) return(empty_mat_out)
     if (visit_was_factor)
       row_names <- factor_nosort(character(0), levels = iv_levels)
     else
@@ -327,7 +326,9 @@ icd_comorbid_common <- function(x,
   # may be slow for big data. `rle` might be quicker if we know that
   # patient-visit rows are always contiguous.
   uniq_visits <- unique(x[[visit_name]]) # factor or vector
-  x[[visit_name]] <- as_char_no_warn(x[[visit_name]])
+
+  if (!is.character(x[[visit_name]]))
+    x[[visit_name]] <- as_char_no_warn(x[[visit_name]])
 
   # start with a factor for the icd codes in x, recode (and drop superfluous)
   # icd codes in the mapping, then do very fast match on integer without need

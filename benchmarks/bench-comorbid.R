@@ -23,10 +23,10 @@ if (is.null(huge_mixed_pts)) {
 
 message("benchmark starting!")
 mb <- microbenchmark(
-  icd_comorbid(pts, icd9_map_ahrq, comorbid_fun = icd:::icd9Comorbid_alt_MatMul),
-  #  icd_comorbid(pts, icd9_map_ahrq, comorbid_fun = icd:::icd9Comorbid_alt_Taskloop),
-#  icd_comorbid(pts, icd9_map_ahrq, comorbid_fun = icd:::icd9Comorbid_alt_Taskloop2),
-  icd_comorbid(pts, icd9_map_ahrq, comorbid_fun = icd:::icd9ComorbidShortCpp),
+  icd_comorbid(huge_mixed_pts, icd9_map_ahrq, comorbid_fun = icd:::icd9Comorbid_alt_MatMul),
+  #  icd_comorbid(huge_mixed_pts, icd9_map_ahrq, comorbid_fun = icd:::icd9Comorbid_alt_Taskloop),
+#  icd_comorbid(huge_mixed_pts, icd9_map_ahrq, comorbid_fun = icd:::icd9Comorbid_alt_Taskloop2),
+  icd_comorbid(huge_mixed_pts, icd9_map_ahrq, comorbid_fun = icd:::icd9ComorbidShortCpp),
   times = 25L)
 
 #  icd_comorbid(pts, icd9_map_ahrq, comorbid_fun = icd:::icd9Comorbid_alt_SparseOmp),
