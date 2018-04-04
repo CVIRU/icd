@@ -17,9 +17,14 @@ if (is.null(huge_mixed_pts)) {
   rnd <- ten_million_random_pts[c("visit_id", "code")]
   names(rnd) <- names(vts)
   huge_mixed_pts <- rbind(rnd, vts)
+  huge_mixed_pts$visit_id <- icd:::as_char_no_warn(huge_mixed_pts$visit_id)
   rm(list = c("rnd", "vts", "vt"))
-  R.cache::saveCache(huge_mixed_pts, key = list("huge_mixed_pts"))
+  R.cache::saveCache(huge_mixed_pts, key = list("huge_mixed_pts"), suffix = "icd.Rcache")
 }
+
+message("profiling!")
+
+profvis::profvis()
 
 message("benchmark starting!")
 mb <- microbenchmark(
