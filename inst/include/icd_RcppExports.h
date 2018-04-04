@@ -288,6 +288,25 @@ namespace icd {
         return Rcpp::as<Rcpp::LogicalMatrix >(rcpp_result_gen);
     }
 
+    inline Rcpp::List icd10_comorbid_reduce(CV icd_codes, Rcpp::List map) {
+        typedef SEXP(*Ptr_icd10_comorbid_reduce)(SEXP,SEXP);
+        static Ptr_icd10_comorbid_reduce p_icd10_comorbid_reduce = NULL;
+        if (p_icd10_comorbid_reduce == NULL) {
+            validateSignature("Rcpp::List(*icd10_comorbid_reduce)(CV,Rcpp::List)");
+            p_icd10_comorbid_reduce = (Ptr_icd10_comorbid_reduce)R_GetCCallable("icd", "_icd_icd10_comorbid_reduce");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_icd10_comorbid_reduce(Shield<SEXP>(Rcpp::wrap(icd_codes)), Shield<SEXP>(Rcpp::wrap(map)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<Rcpp::List >(rcpp_result_gen);
+    }
+
     inline void lookupComorbid_alt_ByChunkForTaskloop(const VecVecInt& vcdb, const VecVecInt& map, NewOut& out) {
         typedef SEXP(*Ptr_lookupComorbid_alt_ByChunkForTaskloop)(SEXP,SEXP,SEXP);
         static Ptr_lookupComorbid_alt_ByChunkForTaskloop p_lookupComorbid_alt_ByChunkForTaskloop = NULL;

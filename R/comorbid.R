@@ -345,7 +345,11 @@ icd_comorbid_common <- function(x,
   # map. many rows are NA, because most are NOT in comorbidity maps:
 
   # but first keep track of the visits with no comorbidities in the given map
-  visit_not_comorbid <- unique(x[is.na(x[[icd_name]]), visit_name])
+  visit_not_comorbid <- unique(
+    .subset2(x,
+             is.na(.subset2(x, icd_name))
+             )[visit_name]
+    )
   # then drop the rows where the code was not in a map
   x <- x[!is.na(x[[icd_name]]), ]
   # now make remove rows where there was both NA and a real code:

@@ -1,3 +1,47 @@
+# Copyright (C) 2014 - 2018  Jack O. Wasey
+#
+# This file is part of icd.
+#
+# icd is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# icd is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with icd. If not, see <http:#www.gnu.org/licenses/>.
+
+#' Comorbidities from ICD-10 codes using matrix multiplication
+#'
+#' Use the fact that we only need to look up comorbidities for those codes which
+#' are in the input data frame, and map. Difference with ICD-9 codes is that we
+#' only have 'parent' codes in the map.
+#'
+#' 1. get list of unique ICD-10 codes in the source data
+#'
+#' 2. make a new comorbidity map containing those codes where those codes'
+#' parents appear in the given map
+#'
+#' 3. use the new common comorbidity code using openmp eigen matrix multiply
+#' with that data.
+#' @keyword internal
+icd10_comorbid_matmul <- function(
+  x,
+  map,
+  visit_name = NULL,
+  icd_name = get_icd_name(x),
+  short_code = icd_guess_short(x, icd_name = icd_name),
+  short_map = icd_guess_short(map),
+  return_df = FALSE, ...) {
+
+  uniq_codes <- unique(x[[icd_name]])
+
+
+}
 
 icd10_comorbid_parent_search_str <- function(
   x,
@@ -38,7 +82,6 @@ icd10_comorbid_parent_search_str <- function(
   rownames(out) <- res[[1]]
   out
 }
-
 
 icd10_comorbid_parent_search_all <- function(x,
                                              map,

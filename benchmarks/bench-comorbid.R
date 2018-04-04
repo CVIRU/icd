@@ -23,8 +23,9 @@ if (is.null(huge_mixed_pts)) {
 }
 
 message("profiling!")
-
-profvis::profvis()
+profvis::profvis(
+  icd::icd_comorbid_ahrq(huge_mixed_pts, preclean = FALSE)
+  )
 
 message("benchmark starting!")
 mb <- microbenchmark(

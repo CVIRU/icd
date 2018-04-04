@@ -162,6 +162,20 @@ icd10_comorbid_parent_search_cpp <- function(x, map, visit_name, icd_name) {
     .Call(`_icd_icd10_comorbid_parent_search_cpp`, x, map, visit_name, icd_name)
 }
 
+#' Internal function to find ICD-10 parents
+#'
+#' Written in C++ for speed. There are no default arguments and there is no
+#' value guessing.
+#' @param x Character vector (not factor)
+#' @template mapping
+#' @template visit_name
+#' @template icd_name
+#' @seealso \url{https://github.com/s-u/fastmatch/blob/master/src/fastmatch.c}
+#' @keywords internal
+icd10_comorbid_reduce <- function(icd_codes, map) {
+    .Call(`_icd_icd10_comorbid_reduce`, icd_codes, map)
+}
+
 #' alternate comorbidity search
 #'
 #' alternate version using much simplified with Openmp taskloop, only in OMP4.5

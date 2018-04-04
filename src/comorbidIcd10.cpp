@@ -18,30 +18,15 @@
 // [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(openmp)]]
 
+#include "config.h"
+#include "local.h" // for DEBUG
 #include "comorbidIcd10.h"
-#include <Rcpp/r/headers.h>                 // for Rf_install, Rf_mkString
 #include <string.h>                         // for strlen, strncpy
 #include <string>                           // for string
 #include "Rcpp.h"                           // for wrap
-#include "Rcpp/DataFrame.h"                 // for DataFrame
-#include "Rcpp/String.h"                    // for String
-#include "Rcpp/api/meat/proxy.h"            // for AttributeProxyPolicy::Att...
-#include "Rcpp/as.h"                        // for as
-#include "Rcpp/exceptions.h"                // for stop
-#include "Rcpp/generated/Vector__create.h"  // for Vector::create
-#include "Rcpp/proxy/AttributeProxy.h"      // for AttributeProxyPolicy<>::A...
-#include "Rcpp/proxy/NamesProxy.h"          // for NamesProxyPolicy<>::Names...
-#include "Rcpp/sugar/functions/any.h"       // for any
-#include "Rcpp/sugar/functions/match.h"     // for match
-#include "Rcpp/vector/Vector.h"             // for Vector<>::NameProxy, Vect...
-#include "Rcpp/vector/instantiation.h"      // for List, LogicalMatrix, Inte...
-#include "Rcpp/vector/proxy.h"              // for r_vector_name_proxy<>::type
-#include "RcppCommon.h"                     // for wrap
 #include "icd_types.h"                      // for CV
-#include "local.h" // for DEBUG
 extern "C" {
   #include <cstddef>                          // for size_t
-  //#include <cstdlib>                          // for size_t
 }
 
 using Rcpp::IntegerVector;
@@ -130,9 +115,6 @@ Rcpp::LogicalMatrix icd10_comorbid_parent_search_cpp(Rcpp::DataFrame x,
       // sometimes as there are only a handful of comorbidities (but can be
       // many).
 
-      // copy the const char * code to a writeable buffer
-      // strcpy(codeCur, code_cstring); // copy here for the moving null terminator reverse method
-      //for (codeCurChar = codeNchar; codeCurChar != 2; --codeCurChar) {
       for (codeCurChar = 3; codeCurChar != codeNchar + 1; ++codeCurChar) {
 #ifdef ICD_DEBUG_TRACE
         Rcpp::Rcout << "codeNchar = " << codeNchar << ", ";
@@ -187,4 +169,61 @@ Rcpp::LogicalMatrix icd10_comorbid_parent_search_cpp(Rcpp::DataFrame x,
   intermed.attr("dimnames") = Rcpp::List::create(x[visit_name], map.names());
 
   return intermed;
+}
+
+
+
+
+
+//' Internal function to find ICD-10 parents
+//'
+//' Written in C++ for speed. There are no default arguments and there is no
+//' value guessing.
+//' @param x Character vector (not factor)
+//' @template mapping
+//' @template visit_name
+//' @template icd_name
+//' @seealso \url{https://github.com/s-u/fastmatch/blob/master/src/fastmatch.c}
+//' @keywords internal
+// [[Rcpp::export]]
+Rcpp::List icd10_comorbid_reduce(CV icd_codes,
+                                 Rcpp::List map) {
+
+  LogicalMatrix intermed(icd_codes.size(), map.size()); // zero-filled
+  std::string code;
+  std::size_t codeNchar; // or char? we know it'll be short
+  String oneCbd;
+  std::string codeCur;
+  size_t codeCurChar;
+
+  Rcpp::List newMap(map.length());
+  // TODO: consider VecVecStr, and/or reserving size of each comorbidity
+
+  for (R_xlen_t i = 0; i != icd_codes.size(); ++i) {
+    code = icd_codes[i];
+    size_t codeLen = code.length();
+    if (codeNchar <3)
+      continue; // cannot be a valid ICD-10 code
+    for (R_xlen_t j = 0; j != map.size(); ++j) {
+      CV cmbCodes = map[j];
+      //for (const std::string cmb : cmbds) {
+      for (CV::iterator k = cmbCodes.begin(); k != cmbCodes.end(); ++k) {
+        std::string cmb = Rcpp::as<std::string>(*k);
+        if (cmb.length() > codeLen)
+          continue; // if map code is longer than the patient's code, it'll never match
+        size_t searchLen = std::min(cmb.length(), codeLen);
+        size_t pos = 0;
+        while(pos != searchLen) {
+          if (cmb[pos] != code[pos])
+            break; // break out as soon as there is a difference
+          ++pos;
+        }
+        if (pos != searchLen)
+          continue; // next code in current comorbidity vector
+        // else we matched
+        // newMap(std::distance(cmbCodes.begin(), k)).push_back(code); // push the patient's code, not the comorbidity onto the new map
+      } // end of codes in current comorbidity
+    } // each comorbidity
+  } // each row of input data
+  return newMap;
 }
