@@ -288,17 +288,17 @@ namespace icd {
         return Rcpp::as<Rcpp::LogicalMatrix >(rcpp_result_gen);
     }
 
-    inline Rcpp::List icd10_comorbid_reduce(CV icd_codes, Rcpp::List map) {
-        typedef SEXP(*Ptr_icd10_comorbid_reduce)(SEXP,SEXP);
-        static Ptr_icd10_comorbid_reduce p_icd10_comorbid_reduce = NULL;
-        if (p_icd10_comorbid_reduce == NULL) {
-            validateSignature("Rcpp::List(*icd10_comorbid_reduce)(CV,Rcpp::List)");
-            p_icd10_comorbid_reduce = (Ptr_icd10_comorbid_reduce)R_GetCCallable("icd", "_icd_icd10_comorbid_reduce");
+    inline Rcpp::List simplifyMapLexicographic(CV pt_codes, Rcpp::List map) {
+        typedef SEXP(*Ptr_simplifyMapLexicographic)(SEXP,SEXP);
+        static Ptr_simplifyMapLexicographic p_simplifyMapLexicographic = NULL;
+        if (p_simplifyMapLexicographic == NULL) {
+            validateSignature("Rcpp::List(*simplifyMapLexicographic)(CV,Rcpp::List)");
+            p_simplifyMapLexicographic = (Ptr_simplifyMapLexicographic)R_GetCCallable("icd", "_icd_simplifyMapLexicographic");
         }
         RObject rcpp_result_gen;
         {
             RNGScope RCPP_rngScope_gen;
-            rcpp_result_gen = p_icd10_comorbid_reduce(Shield<SEXP>(Rcpp::wrap(icd_codes)), Shield<SEXP>(Rcpp::wrap(map)));
+            rcpp_result_gen = p_simplifyMapLexicographic(Shield<SEXP>(Rcpp::wrap(pt_codes)), Shield<SEXP>(Rcpp::wrap(map)));
         }
         if (rcpp_result_gen.inherits("interrupted-error"))
             throw Rcpp::internal::InterruptedException();

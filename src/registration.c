@@ -76,6 +76,7 @@ extern SEXP _icd_rbind_with_empty(SEXP, SEXP);
 extern SEXP _icd_RcppExport_registerCCallable();
 extern SEXP _icd_setDecimalDiag(SEXP, SEXP);
 extern SEXP _icd_setShortDiag(SEXP, SEXP);
+extern SEXP _icd_simplifyMapLexicographic(SEXP, SEXP);
 extern SEXP _icd_strimCpp(SEXP);
 extern SEXP _icd_trimCpp(SEXP);
 extern SEXP _icd_trimLeftCpp(SEXP);
@@ -152,6 +153,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_icd_RcppExport_registerCCallable",          (DL_FUNC) &_icd_RcppExport_registerCCallable,          0},
     {"_icd_setDecimalDiag",                        (DL_FUNC) &_icd_setDecimalDiag,                        2},
     {"_icd_setShortDiag",                          (DL_FUNC) &_icd_setShortDiag,                          2},
+    {"_icd_simplifyMapLexicographic",              (DL_FUNC) &_icd_simplifyMapLexicographic,              2},
     {"_icd_strimCpp",                              (DL_FUNC) &_icd_strimCpp,                              1},
     {"_icd_trimCpp",                               (DL_FUNC) &_icd_trimCpp,                               1},
     {"_icd_trimLeftCpp",                           (DL_FUNC) &_icd_trimLeftCpp,                           1},

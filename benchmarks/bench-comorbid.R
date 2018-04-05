@@ -39,3 +39,9 @@ mb <- microbenchmark(
 
 print(mb)
 
+big_icd10 <- do.call("rbind", replicate(2500, uranium_pathology, simplify = FALSE))
+
+microbenchmark::microbenchmark(
+  icd:::icd10_comorbid_reduce(big_icd10, icd10_map_ahrq, visit_name = "case", icd_name = "icd10", short_code = FALSE, short_map = TRUE, return_df = FALSE),
+  icd:::icd10_comorbid_parent_search_use_cpp(big_icd10, icd10_map_ahrq, visit_name = "case", icd_name = "icd10", short_code = FALSE, short_map = TRUE, return_df = FALSE),
+  times = 3)

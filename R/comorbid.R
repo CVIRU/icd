@@ -164,6 +164,9 @@ icd10_comorbid <- function(x,
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
 #'   icd:::icd10_comorbid_parent_search_use_cpp(up, icd10_map_ahrq,
 #'     visit_name = "case", icd_name = "icd10",
+#'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
+#'   icd:::icd10_comorbid_reduce(up, icd10_map_ahrq,
+#'     visit_name = "case", icd_name = "icd10",
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE)
 #'   ))
 #' \dontrun{
@@ -173,23 +176,27 @@ icd10_comorbid <- function(x,
 #' # substr is fastest by a good margin
 #'
 #' microbenchmark(
-#'   icd10_comorbid_parent_search_str(uranium_pathology, icd10_map_ahrq,
+#'   icd:::icd10_comorbid_parent_search_str(uranium_pathology, icd10_map_ahrq,
 #'     visit_name = "case", icd_name = "icd10",
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   icd10_comorbid_parent_search_use_cpp(uranium_pathology, icd10_map_ahrq,
+#'   icd:::icd10_comorbid_parent_search_use_cpp(uranium_pathology, icd10_map_ahrq,
 #'     visit_name = "case", icd_name = "icd10",
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   icd10_comorbid_parent_search_all(uranium_pathology, icd10_map_ahrq,
+#'   icd:::icd10_comorbid_parent_search_all(uranium_pathology, icd10_map_ahrq,
 #'     visit_name = "case", icd_name = "icd10",
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   icd10_comorbid_parent_search_no_loop(uranium_pathology, icd10_map_ahrq,
+#'   icd:::icd10_comorbid_parent_search_no_loop(uranium_pathology, icd10_map_ahrq,
 #'     visit_name = "case", icd_name = "icd10",
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   icd10_comorbid_parent_search_orig(uranium_pathology, icd10_map_ahrq,
+#'   icd:::icd10_comorbid_parent_search_orig(uranium_pathology, icd10_map_ahrq,
+#'     visit_name = "case", icd_name = "icd10",
+#'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
+#'   icd:::icd10_comorbid_reduce(uranium_pathology, icd10_map_ahrq,
 #'     visit_name = "case", icd_name = "icd10",
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
 #'   times = 3)
 #' }
+#'
 #' @keywords internal
 icd10_comorbid_parent_search <- function(
   x,
@@ -227,6 +234,22 @@ icd10_comorbid_parent_search_use_cpp <- function(x,
   out
 }
 
+#' ICD-10 comorbidities by reducing problem size
+#'
+#' Use method to reduce ICD-10 problem by initially finding only relevant codes
+#' in the map, then populating map only with the exact patient ICD codes (not
+#' the original map codes), before doing 'icd_comorbid_common'
+#' @keywords internal
+icd10_comorbid_reduce <- function(x = x, map = map, visit_name = visit_name,
+                                  icd_name = icd_name, short_code = short_code,
+                                  short_map = short_map, return_df = return_df, ...) {
+  if (!short_code)
+    x[[icd_name]] <- icd_decimal_to_short.icd10(x[[icd_name]])
+
+  reduced_map <- simplifyMapLexicographic(x[[icd_name]], map)
+  icd_comorbid_common(x = x, map = reduced_map, visit_name = visit_name, icd_name = icd_name, return_df = return_df, ...)
+}
+
 #' @describeIn icd_comorbid Get comorbidities from \code{data.frame} of ICD-9
 #'   codes
 #' @param preclean single logical value, which, if \code{TRUE} causes ICD-9
@@ -260,15 +283,13 @@ icd9_comorbid <- function(x,
   # like 010 and 10 exists, then these get contracted by icd_decimal_to_short,
   # making the results different if icd codes are short or not.
 
-  if (short_code && preclean)
-    x[[icd_name]] <- icd9(icd9_add_leading_zeroes(x[[icd_name]], short_code = TRUE))
-
   if (!short_code)
-    icd9(icd_decimal_to_short.icd9(x[[icd_name]]))
+    x[[icd_name]] <- icd9(icd_decimal_to_short.icd9(x[[icd_name]]))
+  else if (preclean)
+    x[[icd_name]] <- icd9(icd9_add_leading_zeroes(x[[icd_name]], short_code = TRUE))
 
   if (!short_map)
     map <- lapply(map, icd_decimal_to_short)
-
   icd_comorbid_common(x = x, map = map, visit_name = visit_name,
                       icd_name = icd_name, return_df = return_df, ...)
 }
@@ -290,7 +311,7 @@ icd_comorbid_common <- function(x,
                                 comorbid_fun = icd9Comorbid_alt_MatMul,
                                 ...) {
   assert_data_frame(x, min.cols = 2, col.names = "unique")
-  assert_list(map, any.missing = FALSE, min.len = 1, unique = TRUE, names = "unique")
+  assert_list(map, any.missing = FALSE, min.len = 1, names = "unique")
   assert(check_string(visit_name), check_null(visit_name))
   assert(check_string(icd_name), check_null(icd_name))
   visit_name <- get_visit_name(x, visit_name)
@@ -345,11 +366,12 @@ icd_comorbid_common <- function(x,
   # map. many rows are NA, because most are NOT in comorbidity maps:
 
   # but first keep track of the visits with no comorbidities in the given map
+  #visit_not_comorbid <- unique(x[is.na(x[[icd_name]]), visit_name])
   visit_not_comorbid <- unique(
-    .subset2(x,
-             is.na(.subset2(x, icd_name))
-             )[visit_name]
-    )
+    .subset(x,
+            is.na(.subset2(x, icd_name))
+    )[visit_name]
+  )
   # then drop the rows where the code was not in a map
   x <- x[!is.na(x[[icd_name]]), ]
   # now make remove rows where there was both NA and a real code:

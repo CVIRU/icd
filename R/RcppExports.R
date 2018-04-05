@@ -162,18 +162,32 @@ icd10_comorbid_parent_search_cpp <- function(x, map, visit_name, icd_name) {
     .Call(`_icd_icd10_comorbid_parent_search_cpp`, x, map, visit_name, icd_name)
 }
 
-#' Internal function to find ICD-10 parents
-#'
-#' Written in C++ for speed. There are no default arguments and there is no
-#' value guessing.
+#' @title Internal function to simplify a comorbidity map by only including codes
+#' which are parents, or identical to, a given list of codes.
+#' @description
+#' Specifically, this is useful for ICD-10 codes where there are a huge number
+#' of possible codes, but we do not want to make a comorbidity map with such a
+#' large number of codes in it.
 #' @param x Character vector (not factor)
 #' @template mapping
 #' @template visit_name
 #' @template icd_name
 #' @seealso \url{https://github.com/s-u/fastmatch/blob/master/src/fastmatch.c}
+#' @examples
+#' # one exact match, next cmb parent code, next cmb child code
+#' icd10 <- as.icd10(c("I0981", "A520", "I26019"))
+#' pts <- data.frame(visit_id = c("a", "b", "c"), icd10)
+#' simple_map <- icd:::simplifyMapLexicographic(icd10, icd10_map_ahrq)
+#' stopifnot(simple_map$CHF == "I0981")
+#' stopifnot(simple_map$PHTN != character(0))
+#' stopifnot(simple_map$PVD == "I26019")
+#'
+#' umap <- icd:::simplifyMapLexicographic(uranium_pathology$icd10, icd10_map_ahrq)
+#' icd:::icd_comorbid_common(uranium_pathology, icd10_map_ahrq, visit_name = "case", icd_name = "icd10", comorbid_fun = icd:::comorbid_alt_MatMul)
+#'
 #' @keywords internal
-icd10_comorbid_reduce <- function(icd_codes, map) {
-    .Call(`_icd_icd10_comorbid_reduce`, icd_codes, map)
+simplifyMapLexicographic <- function(pt_codes, map) {
+    .Call(`_icd_simplifyMapLexicographic`, pt_codes, map)
 }
 
 #' alternate comorbidity search
