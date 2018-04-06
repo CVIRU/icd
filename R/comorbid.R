@@ -78,6 +78,9 @@ icd_poa_choices <- c("yes", "no", "notYes", "notNo")
 #'   \code{option(icd.threads = 4)}. If it is not set, the number of cores in
 #'   the machine is used. 'OpenMP' environment variables also work.
 #' @examples
+#' # get Charlson comorbidities using Quan's mapping for the included Vermont data:
+#'   icd_comorbid_quan_deyo(vermont_dx) %>% head
+#'
 #'   pts <- icd_long_data(visit_name = c("2", "1", "2", "3", "3"),
 #'                    icd9 = c("39891", "40110", "09322", "41514", "39891"))
 #'   icd_comorbid(pts, icd9_map_ahrq, short_code = TRUE) # visit_name is now sorted
@@ -108,6 +111,10 @@ icd_comorbid <- function(x, map, ...) {
 }
 
 #' @describeIn icd_comorbid ICD-10 comorbidities
+#' @param icd10_comorbid_fun function Internal parameter, default will be fast
+#'   and accurate. A function which calculates comorbidities for ICD-10 codes,
+#'   in which the comorbidity map only specifies parent codes, not every
+#'   possible child.
 #' @export
 icd10_comorbid <- function(x,
                            map,
@@ -116,7 +123,7 @@ icd10_comorbid <- function(x,
                            short_code = NULL,
                            short_map = icd_guess_short(map),
                            return_df = FALSE,
-                           comorbid_fun = icd10_comorbid_parent_search, ...) {
+                           icd10_comorbid_fun = icd10_comorbid_reduce, ...) {
   assert_data_frame(x, min.cols = 2, col.names = "unique")
   assert_list(map, any.missing = FALSE, min.len = 1, unique = TRUE, names = "unique")
   assert(check_string(visit_name), check_null(visit_name))
@@ -130,7 +137,7 @@ icd10_comorbid <- function(x,
     icd_name <- get_icd_name(x)
   if (is.null(short_code))
     short_code <- icd_guess_short(x[[icd_name]])
-  comorbid_fun(x = x, map = map, visit_name = visit_name, icd_name = icd_name,
+  icd10_comorbid_fun(x = x, map = map, visit_name = visit_name, icd_name = icd_name,
                short_code = short_code, short_map = short_map, return_df = return_df, ...)
 }
 
@@ -154,29 +161,7 @@ icd10_comorbid <- function(x,
 #' microbenchmark::microbenchmark(substr("12345", 1, 4), substring("12345", 1, 4),
 #'                stringr::str_sub("12345", 1, 4), times = 1e5)
 #' # substr is fastest by a good margin
-#'
-#' microbenchmark::microbenchmark(
-#'   icd:::icd10_comorbid_parent_search_use_cpp(uranium_pathology, icd10_map_ahrq,
-#'     visit_name = "case", icd_name = "icd10",
-#'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   icd:::icd10_comorbid_parent_search_str(uranium_pathology, icd10_map_ahrq,
-#'     visit_name = "case", icd_name = "icd10",
-#'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   icd:::icd10_comorbid_parent_search_orig(uranium_pathology, icd10_map_ahrq,
-#'     visit_name = "case", icd_name = "icd10",
-#'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   icd:::icd10_comorbid_parent_search_all(uranium_pathology, icd10_map_ahrq,
-#'     visit_name = "case", icd_name = "icd10",
-#'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   icd:::icd10_comorbid_parent_search_no_loop(uranium_pathology, icd10_map_ahrq,
-#'     visit_name = "case", icd_name = "icd10",
-#'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   icd:::icd10_comorbid_reduce(uranium_pathology, icd10_map_ahrq,
-#'     visit_name = "case", icd_name = "icd10",
-#'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   check = icd:::all_identical, times = 3)
 #' }
-#'
 #' @keywords internal
 icd10_comorbid_parent_search <- function(
   x,
@@ -199,16 +184,12 @@ icd10_comorbid_parent_search_use_cpp <- function(x,
                                                  short_code = icd_guess_short(x, icd_name = icd_name),
                                                  short_map = icd_guess_short(map),
                                                  return_df = FALSE, ...) {
-
   if (!short_code)
     x[[icd_name]] <- icd_decimal_to_short.icd10(x[[icd_name]])
-
   intermed <- icd10_comorbid_parent_search_cpp(x = x, map = map, visit_name = visit_name, icd_name = icd_name)
-
   res <- aggregate(x = intermed, by = x[visit_name], FUN = any)
   if (return_df)
     return(res)
-
   out <- as.matrix(res[-1])
   rownames(out) <- res[[1]]
   out
@@ -385,7 +366,7 @@ icd_comorbid_common <- function(x,
   # now put the visits back in original order (bearing in mind that they may not
   # have started that way)
   mat_new_row_order <- match(rownames(mat_comb), uniq_visits)
-  mat <- mat_comb[mat_new_row_order,, drop = FALSE] #nolint
+  mat <- mat_comb[order(mat_new_row_order),, drop = FALSE] #nolint
 
   if (!return_df)
     return(mat)
@@ -594,7 +575,6 @@ apply_hier_quan_elix <- function(cbd, abbrev_names = TRUE, hierarchy = TRUE) {
     # about, e.g. POA, or anything else the user provides in the data frame, so
     # these are just dropped, leaving the fields for visit_name and all the
     # comorbidities:
-
     if (abbrev_names)
       colnames(cbd)[cr(cbd)] <- icd::icd_names_quan_elix_abbrev
     else

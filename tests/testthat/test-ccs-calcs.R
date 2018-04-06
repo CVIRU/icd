@@ -98,7 +98,7 @@ test_that("ahrq ccs icd 9 is performing correctly", {
 
   res <- icd9_comorbid_ccs(test_df,  visit_name = "visit_id", icd_name = "icd9")
   # just run this if we find the _alt_ function available, not in production build.
-  if (length(grep("icd9Comorbid_alt_MatMul", unclass(lsf.str(envir = asNamespace("icd"), all = TRUE)))) > 0)
+  if (exists("icd9Comorbid_alt_MatMul") {
     res <- icd9_comorbid_ccs(test_df,  visit_name = "visit_id", icd_name = "icd9", comorbid_fun = icd:::icd9Comorbid_alt_MatMul)
   res2 <- icd9_comorbid_ccs(test_df,  visit_name = "visit_id", icd_name = "icd9", comorbid_fun = icd:::icd9ComorbidShortCpp)
 

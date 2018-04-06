@@ -36,17 +36,14 @@ using Rcpp::any;
 using Rcpp::as;
 
 //' Internal function to find ICD-10 parents
-//'
-//' Written in C++ for speed. There are no default arguments and there is no
-//' value guessing.
 //' @param x Character vector (not factor)
 //' @template mapping
 //' @template visit_name
 //' @template icd_name
 //' @seealso \url{https://github.com/s-u/fastmatch/blob/master/src/fastmatch.c}
 //' @keywords internal
-// [[Rcpp::export]]
-Rcpp::LogicalMatrix icd10_comorbid_parent_search_cpp(Rcpp::DataFrame x,
+// [[Rcpp::export(icd10_comorbid_parent_search_cpp)]]
+Rcpp::LogicalMatrix icd10ComorbidParentSearchCpp(Rcpp::DataFrame x,
                                                      Rcpp::List map,
                                                      std::string visit_name,
                                                      std::string icd_name) {
@@ -126,7 +123,9 @@ Rcpp::LogicalMatrix icd10_comorbid_parent_search_cpp(Rcpp::DataFrame x,
 //' stopifnot(simple_map$PVD == "I26019")
 //'
 //' umap <- icd:::simplify_map_lex(uranium_pathology$icd10, icd10_map_ahrq)
-//' icd:::icd_comorbid_common(uranium_pathology, icd10_map_ahrq, visit_name = "case", icd_name = "icd10", comorbid_fun = icd:::comorbid_alt_MatMul)
+//' icd:::icd_comorbid_common(uranium_pathology, icd10_map_ahrq,
+//'                           visit_name = "case", icd_name = "icd10",
+//'                           comorbid_fun = icd:::icd9Comorbid_alt_MatMul)
 //'
 //' @keywords internal
 // [[Rcpp::export(simplify_map_lex)]]

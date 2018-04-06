@@ -109,9 +109,6 @@ lookupComorbidByChunkFor <- function(vcdb, map, chunkSize, ompChunkSize, out) {
 }
 
 #' Internal function to find ICD-10 parents
-#'
-#' Written in C++ for speed. There are no default arguments and there is no
-#' value guessing.
 #' @param x Character vector (not factor)
 #' @template mapping
 #' @template visit_name
@@ -119,7 +116,7 @@ lookupComorbidByChunkFor <- function(vcdb, map, chunkSize, ompChunkSize, out) {
 #' @seealso \url{https://github.com/s-u/fastmatch/blob/master/src/fastmatch.c}
 #' @keywords internal
 icd10_comorbid_parent_search_cpp <- function(x, map, visit_name, icd_name) {
-    .Call(`_icd_icd10_comorbid_parent_search_cpp`, x, map, visit_name, icd_name)
+    .Call(`_icd_icd10ComorbidParentSearchCpp`, x, map, visit_name, icd_name)
 }
 
 #' @title Internal function to simplify a comorbidity map by only including codes
@@ -143,7 +140,9 @@ icd10_comorbid_parent_search_cpp <- function(x, map, visit_name, icd_name) {
 #' stopifnot(simple_map$PVD == "I26019")
 #'
 #' umap <- icd:::simplify_map_lex(uranium_pathology$icd10, icd10_map_ahrq)
-#' icd:::icd_comorbid_common(uranium_pathology, icd10_map_ahrq, visit_name = "case", icd_name = "icd10", comorbid_fun = icd:::comorbid_alt_MatMul)
+#' icd:::icd_comorbid_common(uranium_pathology, icd10_map_ahrq,
+#'                           visit_name = "case", icd_name = "icd10",
+#'                           comorbid_fun = icd:::icd9Comorbid_alt_MatMul)
 #'
 #' @keywords internal
 simplify_map_lex <- function(pt_codes, map) {

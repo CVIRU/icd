@@ -19,8 +19,8 @@ extern SEXP _icd_getOmpThreads();
 extern SEXP _icd_guessShortCompleteCpp(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_guessShortPlusFactorCpp(SEXP, SEXP);
 extern SEXP _icd_icd_in_reference_code(SEXP, SEXP, SEXP, SEXP);
-extern SEXP _icd_icd10_comorbid_parent_search_cpp(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_icd10cmChildrenDefined(SEXP);
+extern SEXP _icd_icd10ComorbidParentSearchCpp(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_icd10DecimalToPartsCpp(SEXP, SEXP);
 extern SEXP _icd_icd10ShortToPartsCpp(SEXP, SEXP);
 extern SEXP _icd_icd9_is_e_cpp(SEXP);
@@ -96,8 +96,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_icd_guessShortCompleteCpp",                 (DL_FUNC) &_icd_guessShortCompleteCpp,                 4},
     {"_icd_guessShortPlusFactorCpp",               (DL_FUNC) &_icd_guessShortPlusFactorCpp,               2},
     {"_icd_icd_in_reference_code",                 (DL_FUNC) &_icd_icd_in_reference_code,                 4},
-    {"_icd_icd10_comorbid_parent_search_cpp",      (DL_FUNC) &_icd_icd10_comorbid_parent_search_cpp,      4},
     {"_icd_icd10cmChildrenDefined",                (DL_FUNC) &_icd_icd10cmChildrenDefined,                1},
+    {"_icd_icd10ComorbidParentSearchCpp",          (DL_FUNC) &_icd_icd10ComorbidParentSearchCpp,          4},
     {"_icd_icd10DecimalToPartsCpp",                (DL_FUNC) &_icd_icd10DecimalToPartsCpp,                2},
     {"_icd_icd10ShortToPartsCpp",                  (DL_FUNC) &_icd_icd10ShortToPartsCpp,                  2},
     {"_icd_icd9_is_e_cpp",                         (DL_FUNC) &_icd_icd9_is_e_cpp,                         1},

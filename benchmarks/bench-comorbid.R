@@ -45,3 +45,25 @@ microbenchmark::microbenchmark(
   icd10_comorbid_reduce(big_icd10, icd10_map_ahrq, visit_name = "case", icd_name = "icd10", short_code = FALSE, short_map = TRUE, return_df = FALSE),
   icd10_comorbid_parent_search_use_cpp(big_icd10, icd10_map_ahrq, visit_name = "case", icd_name = "icd10", short_code = FALSE, short_map = TRUE, return_df = FALSE),
   times = 3)
+
+# look at all icd-10 options at once
+ microbenchmark::microbenchmark(
+   icd:::icd10_comorbid_parent_search_use_cpp(uranium_pathology, icd10_map_ahrq,
+     visit_name = "case", icd_name = "icd10",
+     short_code = FALSE, short_map = TRUE, return_df = FALSE),
+   icd:::icd10_comorbid_parent_search_str(uranium_pathology, icd10_map_ahrq,
+     visit_name = "case", icd_name = "icd10",
+     short_code = FALSE, short_map = TRUE, return_df = FALSE),
+   icd:::icd10_comorbid_parent_search_orig(uranium_pathology, icd10_map_ahrq,
+     visit_name = "case", icd_name = "icd10",
+     short_code = FALSE, short_map = TRUE, return_df = FALSE),
+   icd:::icd10_comorbid_parent_search_all(uranium_pathology, icd10_map_ahrq,
+     visit_name = "case", icd_name = "icd10",
+     short_code = FALSE, short_map = TRUE, return_df = FALSE),
+   icd:::icd10_comorbid_parent_search_no_loop(uranium_pathology, icd10_map_ahrq,
+     visit_name = "case", icd_name = "icd10",
+     short_code = FALSE, short_map = TRUE, return_df = FALSE),
+   icd:::icd10_comorbid_reduce(uranium_pathology, icd10_map_ahrq,
+     visit_name = "case", icd_name = "icd10",
+     short_code = FALSE, short_map = TRUE, return_df = FALSE),
+   check = icd:::all_identical, times = 3)

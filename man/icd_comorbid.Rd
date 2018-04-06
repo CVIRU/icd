@@ -28,7 +28,7 @@ icd_comorbid(x, map, ...)
 
 icd10_comorbid(x, map, visit_name = NULL, icd_name = NULL,
   short_code = NULL, short_map = icd_guess_short(map), return_df = FALSE,
-  comorbid_fun = icd10_comorbid_parent_search, ...)
+  icd10_comorbid_fun = icd10_comorbid_reduce, ...)
 
 icd9_comorbid(x, map, visit_name = NULL, icd_name = NULL,
   short_code = icd_guess_short(x, icd_name = icd_name),
@@ -101,6 +101,11 @@ Where reasonable, this is guessed from the input data.}
 frame of ICD codes, \code{x}. All the codes in a mapping should be of the
 same type, i.e. short or decimal.}
 
+\item{icd10_comorbid_fun}{function Internal parameter, default will be fast
+and accurate. A function which calculates comorbidities for ICD-10 codes,
+in which the comorbidity map only specifies parent codes, not every
+possible child.}
+
 \item{preclean}{single logical value, which, if \code{TRUE} causes ICD-9
 'short' code input to be padded to correct three (or four for E code)
 length before applying the comorbidity map. For very large data sets, e.g.
@@ -169,6 +174,9 @@ codes
 }}
 
 \examples{
+# get Charlson comorbidities using Quan's mapping for the included Vermont data:
+  icd_comorbid_quan_deyo(vermont_dx) \%>\% head
+
   pts <- icd_long_data(visit_name = c("2", "1", "2", "3", "3"),
                    icd9 = c("39891", "40110", "09322", "41514", "39891"))
   icd_comorbid(pts, icd9_map_ahrq, short_code = TRUE) # visit_name is now sorted
