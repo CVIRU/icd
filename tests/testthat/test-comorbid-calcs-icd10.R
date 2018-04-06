@@ -118,7 +118,7 @@ test_that("ICD-10 map reduction is sane", {
 test_that("using reduction method for ICD-10", {
   if (!exists("icd10_comorbid_reduce"))
     skip("icd10_comorbid_reduce not available")
-  res <- icd10_comorbid(uranium_pathology, map = icd10_map_ahrq, comorbid_fun = icd10_comorbid_reduce)
+  res <- icd10_comorbid(uranium_pathology, map = icd10_map_ahrq, icd10_comorbid_fun = icd10_comorbid_reduce)
   expect_equal(ncol(res), 30)
 
   expect_identical(

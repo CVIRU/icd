@@ -78,8 +78,11 @@ icd_poa_choices <- c("yes", "no", "notYes", "notNo")
 #'   \code{option(icd.threads = 4)}. If it is not set, the number of cores in
 #'   the machine is used. 'OpenMP' environment variables also work.
 #' @examples
-#' # get Charlson comorbidities using Quan's mapping for the included Vermont data:
-#'   icd_comorbid_quan_deyo(vermont_dx) %>% head
+#'   # get fisrt few Charlson comorbidities using Quan's mapping for the ICD-9 Vermont data:
+#'   head(icd_comorbid_quan_deyo(vermont_dx))
+#'
+#'   # get summary AHRQ (based on Elixhauser) comorbidities for ICD-10 Uranium data:
+#'   summary(icd_comorbid_ahrq(uranium_pathology))
 #'
 #'   pts <- icd_long_data(visit_name = c("2", "1", "2", "3", "3"),
 #'                    icd9 = c("39891", "40110", "09322", "41514", "39891"))

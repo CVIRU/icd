@@ -97,10 +97,10 @@ test_that("ahrq ccs icd 9 is performing correctly", {
     )
 
   res <- icd9_comorbid_ccs(test_df,  visit_name = "visit_id", icd_name = "icd9")
-  # just run this if we find the _alt_ function available, not in production build.
-  if (exists("icd9Comorbid_alt_MatMul") {
-    res <- icd9_comorbid_ccs(test_df,  visit_name = "visit_id", icd_name = "icd9", comorbid_fun = icd:::icd9Comorbid_alt_MatMul)
-  res2 <- icd9_comorbid_ccs(test_df,  visit_name = "visit_id", icd_name = "icd9", comorbid_fun = icd:::icd9ComorbidShortCpp)
+  if (exists("icd9Comorbid_alt_MatMul")) {
+    expect_identical(icd9_comorbid_ccs(test_df, comorbid_fun = icd:::icd9Comorbid_alt_MatMul),
+                     icd9_comorbid_ccs(test_df, comorbid_fun = icd:::icd9ComorbidShortCpp))
+  }
 
   a_res <- which(sapply(icd9_map_single_ccs, function(y) "01012" %in% y))
   b_res1 <- which(sapply(icd9_map_single_ccs, function(y) "32341" %in% y))
@@ -113,9 +113,7 @@ test_that("ahrq ccs icd 9 is performing correctly", {
   manual_res[2, b_res1] <- TRUE
   manual_res[2, b_res2] <- TRUE
   manual_res[3, c_res] <- TRUE
-  expect_equivalent(manual_res, res2)
   expect_equivalent(manual_res, res)
-  expect_identical(res, res2)
   expect_true(all(mapply(function(x, y) res[x, y], test_df$visit_id, test_df$single)))
   expect_equal(dim(res), c(3, 284))
 
