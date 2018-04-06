@@ -105,3 +105,19 @@ test_that("cmb from a ICD-10, no infinite recursion with Elix", {
     }
   }
 })
+
+test_that("ICD-10 map reduction is sane", {
+  uranium_short_codes <- as_char_or_levels(icd_decimal_to_short.icd10(uranium_pathology$icd10))
+  red_map <- simplify_map_lex(uranium_short_codes, icd10_map_ahrq)
+  # the map should not have its original contents, but only those codes which
+  # were in the pt data. Converse is not true, as some patient codes do not fall
+  # into comorbidity.
+  expect_true(all(unname(unlist(red_map)) %in% uranium_short_codes))
+})
+
+test_that("using reduction method for ICD-10", {
+  if (!exists("icd10_comorbid_reduce"))
+    skip("icd10_comorbid_reduce not available")
+  res <- icd10_comorbid(uranium_pathology, map = icd10_map_ahrq, comorbid_fun = icd10_comorbid_reduce)
+  expect_equal(ncol(res), 30)
+})

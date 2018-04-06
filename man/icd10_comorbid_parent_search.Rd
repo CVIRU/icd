@@ -20,31 +20,37 @@ if (exists("icd10_comorbid_parent_search_orig"))
     short_code = FALSE, short_map = TRUE, return_df = FALSE),
   icd:::icd10_comorbid_parent_search_use_cpp(up, icd10_map_ahrq,
     visit_name = "case", icd_name = "icd10",
+    short_code = FALSE, short_map = TRUE, return_df = FALSE),
+  icd:::icd10_comorbid_reduce(up, icd10_map_ahrq,
+    visit_name = "case", icd_name = "icd10",
     short_code = FALSE, short_map = TRUE, return_df = FALSE)
   ))
 \dontrun{
-library(microbenchmark)
-microbenchmark(substr("12345", 1, 4), substring("12345", 1, 4),
+microbenchmark::microbenchmark(substr("12345", 1, 4), substring("12345", 1, 4),
                stringr::str_sub("12345", 1, 4), times = 1e5)
 # substr is fastest by a good margin
 
-microbenchmark(
-  icd10_comorbid_parent_search_str(uranium_pathology, icd10_map_ahrq,
+microbenchmark::microbenchmark(
+  icd:::icd10_comorbid_parent_search_use_cpp(uranium_pathology, icd10_map_ahrq,
     visit_name = "case", icd_name = "icd10",
     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-  icd10_comorbid_parent_search_use_cpp(uranium_pathology, icd10_map_ahrq,
+  icd:::icd10_comorbid_parent_search_str(uranium_pathology, icd10_map_ahrq,
     visit_name = "case", icd_name = "icd10",
     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-  icd10_comorbid_parent_search_all(uranium_pathology, icd10_map_ahrq,
+  icd:::icd10_comorbid_parent_search_orig(uranium_pathology, icd10_map_ahrq,
     visit_name = "case", icd_name = "icd10",
     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-  icd10_comorbid_parent_search_no_loop(uranium_pathology, icd10_map_ahrq,
+  icd:::icd10_comorbid_parent_search_all(uranium_pathology, icd10_map_ahrq,
     visit_name = "case", icd_name = "icd10",
     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-  icd10_comorbid_parent_search_orig(uranium_pathology, icd10_map_ahrq,
+  icd:::icd10_comorbid_parent_search_no_loop(uranium_pathology, icd10_map_ahrq,
     visit_name = "case", icd_name = "icd10",
     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-  times = 3)
+  icd:::icd10_comorbid_reduce(uranium_pathology, icd10_map_ahrq,
+    visit_name = "case", icd_name = "icd10",
+    short_code = FALSE, short_map = TRUE, return_df = FALSE),
+  check = icd:::all_identical, times = 3)
 }
+
 }
 \keyword{internal}

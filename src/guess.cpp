@@ -48,15 +48,13 @@ bool guessShortCompleteCpp(SEXP x_,
                            SEXP short_code = R_NilValue,
                            int n = 1000L,
                            SEXP icd_name = R_NilValue) {
-
-  // if short_code is set, just return that. Do it using C API because of Rcpp
-  // argument weirdness with NULL values
   if (!Rf_isNull(short_code))
     return Rf_asLogical(short_code);
-
-  if (Rf_getAttrib(x_, Rf_install("icd_short_diag")) != R_NilValue)
-    return Rf_asLogical(x_);
-
+  Rcpp::RObject isd_maybe_null = ((Rcpp::RObject)x_).attr("icd_short_diag");
+  if (!isd_maybe_null.isNULL()) {
+    Rcpp::LogicalVector icd_short_diag = (Rcpp::LogicalVector)isd_maybe_null;
+    return icd_short_diag[0];
+  }
   if (Rf_inherits(x_, "data.frame")) {
     std::string ns("icd");
     Rcpp::Function get_icd_name("get_icd_name", ns);
@@ -64,12 +62,10 @@ bool guessShortCompleteCpp(SEXP x_,
     SEXP icd_name_not_null(get_icd_name(rdf, icd_name));
     return guessShortPlusFactorCpp(getRListOrDfElement(x_, CHAR(STRING_ELT(icd_name_not_null, 0))), n);
   }
-
   if (TYPEOF(x_) == VECSXP) {
     // don't unlist (it's complicated), just guess based on first element
     return guessShortPlusFactorCpp(VECTOR_ELT(x_, 0));
   }
-
   return guessShortPlusFactorCpp(x_, n);;
 }
 

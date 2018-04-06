@@ -115,25 +115,10 @@ icd10_comorbid <- function(x,
                            icd_name = NULL,
                            short_code = NULL,
                            short_map = icd_guess_short(map),
-                           return_df = FALSE, ...) {
-
-  # need a new way of looking up co-morbidity by string matching. This is
-  # annoying, but necessary, since there is a very large number of ICD-10-CM (not
-  # so much WHO) codes which are too numerous to pre-compute.
-  #
-  # options are:
-  #
-  # 1. do recompute, but only after installing package.
-  #
-  # 2. do string matching looking for target, then successive parents in the
-  # comorbidities
-  #
-  # 2b. use a very fast lookup table for this, don't loop through the
-  # comorbidities.
-
+                           return_df = FALSE,
+                           comorbid_fun = icd10_comorbid_parent_search, ...) {
   assert_data_frame(x, min.cols = 2, col.names = "unique")
   assert_list(map, any.missing = FALSE, min.len = 1, unique = TRUE, names = "unique")
-
   assert(check_string(visit_name), check_null(visit_name))
   assert(check_string(icd_name), check_null(icd_name))
   visit_name <- get_visit_name(x, visit_name)
@@ -141,17 +126,13 @@ icd10_comorbid <- function(x,
   assert_string(visit_name)
   assert(check_flag(short_code), check_null(short_code))
   assert_flag(short_map)
-
   if (is.null(icd_name))
     icd_name <- get_icd_name(x)
-
   if (is.null(short_code))
     short_code <- icd_guess_short(x[[icd_name]])
-
-  icd10_comorbid_parent_search(x = x, map = map, visit_name = visit_name, icd_name = icd_name,
-                               short_code = short_code, short_map = short_map, return_df = return_df, ...)
+  comorbid_fun(x = x, map = map, visit_name = visit_name, icd_name = icd_name,
+               short_code = short_code, short_map = short_map, return_df = return_df, ...)
 }
-
 
 #' find ICD-10 comorbidities by checking parents
 #'
@@ -170,16 +151,18 @@ icd10_comorbid <- function(x,
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE)
 #'   ))
 #' \dontrun{
-#' library(microbenchmark)
-#' microbenchmark(substr("12345", 1, 4), substring("12345", 1, 4),
+#' microbenchmark::microbenchmark(substr("12345", 1, 4), substring("12345", 1, 4),
 #'                stringr::str_sub("12345", 1, 4), times = 1e5)
 #' # substr is fastest by a good margin
 #'
-#' microbenchmark(
+#' microbenchmark::microbenchmark(
+#'   icd:::icd10_comorbid_parent_search_use_cpp(uranium_pathology, icd10_map_ahrq,
+#'     visit_name = "case", icd_name = "icd10",
+#'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
 #'   icd:::icd10_comorbid_parent_search_str(uranium_pathology, icd10_map_ahrq,
 #'     visit_name = "case", icd_name = "icd10",
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   icd:::icd10_comorbid_parent_search_use_cpp(uranium_pathology, icd10_map_ahrq,
+#'   icd:::icd10_comorbid_parent_search_orig(uranium_pathology, icd10_map_ahrq,
 #'     visit_name = "case", icd_name = "icd10",
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
 #'   icd:::icd10_comorbid_parent_search_all(uranium_pathology, icd10_map_ahrq,
@@ -188,13 +171,10 @@ icd10_comorbid <- function(x,
 #'   icd:::icd10_comorbid_parent_search_no_loop(uranium_pathology, icd10_map_ahrq,
 #'     visit_name = "case", icd_name = "icd10",
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   icd:::icd10_comorbid_parent_search_orig(uranium_pathology, icd10_map_ahrq,
-#'     visit_name = "case", icd_name = "icd10",
-#'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
 #'   icd:::icd10_comorbid_reduce(uranium_pathology, icd10_map_ahrq,
 #'     visit_name = "case", icd_name = "icd10",
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   times = 3)
+#'   check = icd:::all_identical, times = 3)
 #' }
 #'
 #' @keywords internal
@@ -246,8 +226,10 @@ icd10_comorbid_reduce <- function(x = x, map = map, visit_name = visit_name,
   if (!short_code)
     x[[icd_name]] <- icd_decimal_to_short.icd10(x[[icd_name]])
 
-  reduced_map <- simplifyMapLexicographic(x[[icd_name]], map)
-  icd_comorbid_common(x = x, map = reduced_map, visit_name = visit_name, icd_name = icd_name, return_df = return_df, ...)
+  reduced_map <- simplify_map_lex(as_char_or_levels(x[[icd_name]]), map)
+  icd_comorbid_common(x = x, map = reduced_map,
+                      visit_name = visit_name, icd_name = icd_name,
+                      return_df = return_df, ...)
 }
 
 #' @describeIn icd_comorbid Get comorbidities from \code{data.frame} of ICD-9
@@ -366,12 +348,10 @@ icd_comorbid_common <- function(x,
   # map. many rows are NA, because most are NOT in comorbidity maps:
 
   # but first keep track of the visits with no comorbidities in the given map
-  #visit_not_comorbid <- unique(x[is.na(x[[icd_name]]), visit_name])
-  visit_not_comorbid <- unique(
-    .subset(x,
-            is.na(.subset2(x, icd_name))
-    )[visit_name]
-  )
+  visit_not_comorbid <- unique(x[is.na(x[[icd_name]]), visit_name])
+  #visit_not_comorbid <- unique(
+  #  .subset2(.subset(x, is.na(.subset2(x, icd_name))), visit_name)
+  #)
   # then drop the rows where the code was not in a map
   x <- x[!is.na(x[[icd_name]]), ]
   # now make remove rows where there was both NA and a real code:
@@ -582,7 +562,6 @@ apply_hier_elix <- function(x, abbrev_names = TRUE, hierarchy = TRUE) {
 
     # drop HTNcx without converting to vector if matrix only has one row
     x <- x[, -which(colnames(x) == "HTNcx"), drop = FALSE]
-
     if (abbrev_names)
       colnames(x)[cr(x)] <- icd::icd_names_elix_abbrev
     else
@@ -650,8 +629,8 @@ apply_hier_quan_deyo <- function(cbd, abbrev_names = TRUE, hierarchy = TRUE) {
 #' @rdname apply_hier
 #' @keywords internal manip
 apply_hier_ahrq <- function(cbd, abbrev_names = TRUE, hierarchy = TRUE) {
+  stopifnot(ncol(cbd) == 30 + is.data.frame(cbd))
   if (hierarchy) {
-
     # Use >0 rather than logical - apparently faster, and future proof against
     # change to binary from logical values in the matirx.
     cbd[cbd[, "Mets"] > 0, "Tumor"] <- FALSE
@@ -662,7 +641,6 @@ apply_hier_ahrq <- function(cbd, abbrev_names = TRUE, hierarchy = TRUE) {
 
     # drop HTNcx without converting to vector if matrix only has one row
     cbd <- cbd[, -which(colnames(cbd) == "HTNcx"), drop = FALSE]
-
     if (abbrev_names)
       colnames(cbd)[cr(cbd)] <- icd::icd_names_ahrq_abbrev
     else

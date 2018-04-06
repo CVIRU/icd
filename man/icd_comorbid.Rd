@@ -28,7 +28,7 @@ icd_comorbid(x, map, ...)
 
 icd10_comorbid(x, map, visit_name = NULL, icd_name = NULL,
   short_code = NULL, short_map = icd_guess_short(map), return_df = FALSE,
-  ...)
+  comorbid_fun = icd10_comorbid_parent_search, ...)
 
 icd9_comorbid(x, map, visit_name = NULL, icd_name = NULL,
   short_code = icd_guess_short(x, icd_name = icd_name),

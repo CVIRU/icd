@@ -113,3 +113,7 @@ test_that("guess short update", {
   expect_false(is.icd_short_diag(res))
   expect_true(is.icd_decimal_diag(res))
 })
+
+test_that("guess uranium codes are long", {
+  expect_false(icd_guess_short(icd::uranium_pathology$icd10))
+})

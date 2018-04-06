@@ -120,16 +120,16 @@ Rcpp::LogicalMatrix icd10_comorbid_parent_search_cpp(Rcpp::DataFrame x,
 //' # one exact match, next cmb parent code, next cmb child code
 //' icd10 <- as.icd10(c("I0981", "A520", "I26019"))
 //' pts <- data.frame(visit_id = c("a", "b", "c"), icd10)
-//' simple_map <- icd:::simplifyMapLexicographic(icd10, icd10_map_ahrq)
+//' simple_map <- icd:::simplify_map_lex(icd10, icd10_map_ahrq)
 //' stopifnot(simple_map$CHF == "I0981")
 //' stopifnot(simple_map$PHTN != character(0))
 //' stopifnot(simple_map$PVD == "I26019")
 //'
-//' umap <- icd:::simplifyMapLexicographic(uranium_pathology$icd10, icd10_map_ahrq)
+//' umap <- icd:::simplify_map_lex(uranium_pathology$icd10, icd10_map_ahrq)
 //' icd:::icd_comorbid_common(uranium_pathology, icd10_map_ahrq, visit_name = "case", icd_name = "icd10", comorbid_fun = icd:::comorbid_alt_MatMul)
 //'
 //' @keywords internal
-// [[Rcpp::export]]
+// [[Rcpp::export(simplify_map_lex)]]
 Rcpp::List simplifyMapLexicographic(CV pt_codes, Rcpp::List map) {
   std::string ptCode;
   Rcpp::String oneCbd;

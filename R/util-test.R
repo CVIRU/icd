@@ -315,3 +315,10 @@ random_string <- function(n, max_chars = 4) {
          FUN.VALUE = character(n)
   )  %>% apply(1, paste0, collapse = "")
 }
+
+#' allow microbenchmark to compare multiple results
+#' @param x list of values to compare for identity, e.g. results from evaluated
+#'   expression in \code{microbenchmark::microbenchmark}
+#' @keywords internal
+all_identical <- function(x)
+  all(sapply(x[-1], function(y) identical(x[[1]], y)))
