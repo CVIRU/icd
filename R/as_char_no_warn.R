@@ -25,9 +25,9 @@ as_char_no_warn <- function(x) {
   old <- options(warn = -1)
   on.exit(options(old))
   if (is.integer(x))
-    fastIntToStringRcpp(x)
+    return(fastIntToStringRcpp(x))
   if (is.factor(x))
-    levels(x)[x]
+    return(levels(x)[x])
   as.character(x)
 }
 

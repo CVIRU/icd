@@ -175,21 +175,24 @@ icd10_comorbid_parent_search <- function(
   short_map = icd_guess_short(map),
   return_df = FALSE, ...) {
   # use the CPP version by default
-  icd10_comorbid_parent_search_use_cpp(x = x, map = map, visit_name = visit_name,
-                                       icd_name = icd_name, short_code = short_code,
-                                       short_map = short_map, return_df = return_df, ...)
+  icd10_comorbid_parent_search_use_cpp(
+    x = x, map = map, visit_name = visit_name,
+    icd_name = icd_name, short_code = short_code,
+    short_map = short_map, return_df = return_df, ...)
 }
 
-icd10_comorbid_parent_search_use_cpp <- function(x,
-                                                 map,
-                                                 visit_name = NULL,
-                                                 icd_name = get_icd_name(x),
-                                                 short_code = icd_guess_short(x, icd_name = icd_name),
-                                                 short_map = icd_guess_short(map),
-                                                 return_df = FALSE, ...) {
+icd10_comorbid_parent_search_use_cpp <- function(
+  x,
+  map,
+  visit_name = NULL,
+  icd_name = get_icd_name(x),
+  short_code = icd_guess_short(x, icd_name = icd_name),
+  short_map = icd_guess_short(map),
+  return_df = FALSE, ...) {
   if (!short_code)
     x[[icd_name]] <- icd_decimal_to_short.icd10(x[[icd_name]])
-  intermed <- icd10_comorbid_parent_search_cpp(x = x, map = map, visit_name = visit_name, icd_name = icd_name)
+  intermed <- icd10_comorbid_parent_search_cpp(
+    x = x, map = map, visit_name = visit_name, icd_name = icd_name)
   res <- aggregate(x = intermed, by = x[visit_name], FUN = any)
   if (return_df)
     return(res)
@@ -332,11 +335,15 @@ icd_comorbid_common <- function(x,
   # map. many rows are NA, because most are NOT in comorbidity maps:
 
   # but first keep track of the visits with no comorbidities in the given map
-  visit_not_comorbid <- unique(x[is.na(x[[icd_name]]), visit_name])
-  #visit_not_comorbid <- unique(
-  #  .subset2(.subset(x, is.na(.subset2(x, icd_name))), visit_name)
-  #)
+  # visit_not_comorbid_orig <- unique(x[is.na(x[[icd_name]]), visit_name])
+  visit_not_comorbid <- unique(
+    .subset2(
+      .subset(x, is.na(
+        .subset2(x, icd_name))), visit_name))
   # then drop the rows where the code was not in a map
+
+  visit_not_comorbid <- unique(.subset2(x, visit_name)[is.na(.subset2(x,icd_name))])
+
   x <- x[!is.na(x[[icd_name]]), ]
   # now make remove rows where there was both NA and a real code:
   visit_not_comorbid <- visit_not_comorbid[visit_not_comorbid %nin% x[[visit_name]]]

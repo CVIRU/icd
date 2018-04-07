@@ -1,7 +1,7 @@
 # Version 3.0
- * Added AHRQ clinical condition software (CCS) classification, thanks to Vitaly Drucker
- * Assume C++11, which is now four years old, and enables a great deal of code simplification. Would do C++14 but Rtools is still on GCC 4.9.3!
- * drop unused and messy experimental code
+ * Comorbidities for ICD-10 codes now 1.5 - 2 orders of magnitude faster using matrix multiplication to solve problem under the hood
+ * Added AHRQ clinical condition software (CCS) classification for ICD-9 and ICD-10, thanks to Vitaly Drucker
+ * Assume C++11, which is now four years old, and enables code simplification.
  
 # Version 2.4.1
  * updated HCC to include 2017 data, thanks to @anobel fixes #136
