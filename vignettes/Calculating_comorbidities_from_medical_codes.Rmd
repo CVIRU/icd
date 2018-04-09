@@ -1,0 +1,234 @@
+---
+title: "Calculating comorbidities from medical codes"
+author: "Jack O. Wasey"
+date: "4/9/2018"
+output: 
+  pdf_document: 
+    keep_tex: yes
+vignette: >
+  %\VignetteIndexEntry{Calculating comorbidities from medical codes}
+  \usepackage[utf8]{inputenc}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+<!--
+Copyright (C) 2014 - 2018  Jack O. Wasey
+
+This file is part of icd.
+
+icd is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+icd is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with icd. If not, see <http:#www.gnu.org/licenses/>.
+-->
+```{r setup, echo = FALSE, cache = FALSE}
+suppressWarnings({
+  suppressPackageStartupMessages({
+    loadNamespace("knitr") # for opts_chunk only
+    library(icd)
+    library(magrittr)
+    library(utils)
+    })
+  })
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+
+patients_icd9 <- data.frame(
+  visit_id = c(1000, 1000, 1000, 1000, 1001, 1001, 1002),
+  icd9 = as.icd9(c("40201", "2258", "7208", "25001", "34400", "4011", "4011")),
+  poa = c("Y", NA, "N", "Y", "X", "Y", "E"),
+  stringsAsFactors = FALSE
+  )
+```
+
+## Introduction
+
+Almost every report of a clinical investigation in medicine includes a table showing the characteristics of the groups within a study population. The purpose of this table is to show differences between the groups, or, better still, to show how similar they were. It is of central importance that confounding is reduced: in randomized studies, this is achieved by recruiting enough patients and randomly assigning them to treatment. In retrospective research, differences between the exposed and unexposed group are expected. Either way, it is essential to know what the characteristics of each group were. In RCTs, we expect no significant differences between the groups; in retrospective studies, the differences must be known in order to perform risk adjustment.
+
+Medical coding has a complicated history beginning with epidemiology, and snowballing to include medical billing and research. There are several major coding schemes, including the WHO ICD family, the USA ICD clinical modification of WHO ICD codes, SNOMED-CT, CPT, and more. There are codes for diagnoses, procedures, medical equipment, and causes of disease. Codes sometimes include details more important to medical billing than clinical care or research, e.g. the infamous ICD-10-CM code: V97.33XD "Sucked into jet engine, subsequent encounter." These codes are frequently used as the basis for establishing which classes of disease a patient has in propsective or retrospective research. The disease classes might be things like heart failure, cancer, or depression, each compromised of numerous codes which are carefully curated (e.g. Quan). In particular, ICD-9 and ICD-10 codes have been carefully assigned to disease classes which will be referred to as "comorbidities" (i.e. diseases which are present in addition to the intervention or disease of interest), and these are most commonly used as a basis for constructing the baseline patient information, and, depending on the study type, for risk adjustment.
+
+The problem of determining which patients have which disease classes seems straightforward:
+ - for each code, search the lists of codes for each comorbidity
+ - if a matching diagnostic code is found, then record the presence of that comorbidity
+ 
+Executing this in now common large healthcare data sets is a computational challenge which 'icd' solves. For ICD diagnostic code comorbidity maps, the problems are as follows:
+ - ICD
+  - there are multiple notations of ICD codes, ICD-9-CM codes are particularly variable
+  - there is an hierarchical relationship between codes, e.g. I110 is a child code of I11, the parent code
+  - some codes are only parents in the hierarchy and not considered diagnostic codes in their own right
+  - raw healthcare data is often not normalized, thus has the ICD codes spread across many columns in a database table
+  - codes entered by medical coders may not be constrained to a definitive list, so may contain invalid codes
+  - the US ICD scheme is updated annually
+ - computational
+  - character-based comparisons and searching is slow and memory intensive.
+  - large healthcare data sets commonly have tens or hundreds of millions of rows, so naive computations can be completely impractical.
+ 
+On the last point, big data solutions cannot often be solved by increasing hardware capacity. The ready availability of many computing cores in the cloud does not help an algorithm which is limited to a single thread, or an algorithm which is ignorant of how CPU memory caching works. 'icd' was designed to work efficiently on big healthcare data using parallel processing, and by minimizing the memory reuqirements of the problem.
+
+## Main feautres of 'icd'
+
+User-facing features:
+ - calculate comorbidities based on ICD-9 or ICD-10 codes
+ - validate ICD codes
+ - convert ICD codes to human-readable descriptions
+ - convert wide to long format patient data
+ - convert between different ICD code representations
+ - calculate AHRQ Hierarchical Condition Code scores
+ - emulate AHRQ CCS
+ 
+Internal:
+ - derive the comorbidity maps directly from canonical software written in SAS for maximum fidelity to original authors' intentions
+ - C and C++ code and accelerated matrix algebra to give accurate results quickly with big data
+ - extensive test suite
+
+
+## Methods
+
+Commonly used comorbidity maps are published in scientific journals, and sometimes also as software. None such software is implemented in R.
+
+
+### Comorbidities
+
+This package contains ICD-9-CM to comorbidity mappings from several sources, based on either the AHRQ, Charlson or Elixhauser lists of comorbidities. Updated versions of these lists from [AHRQ](http://www.hcup-us.ahrq.gov/toolssoftware/comorbidity/comorbidity.jsp) and [Quan et al](http://www.ncbi.nlm.nih.gov/pubmed/16224307) are included, along with the original Elixhauser mapping . Since some data is provided in SAS source code format, this package has internal functions to parse this SAS source code and generate R data structures. This processing is limited to what is needed for this purpose, although may be generalizable and useful in other contexts. Other lists are transcribed directly from the published articles, but interpretation of SAS code used for the original publications is preferable.
+
+### AHRQ comorbidity classification
+
+The AHRQ keeps an updated version of the Elixhauser classification of ICD-9-CM and ICD-10-CM codes into comorbidities. They provide the data in the form of SAS code. The names of the comorbidities derived from ICD-9 and ICD-10 codes are the same. Maps contain the ICD code to comorbidity mappings; the functions that apply those mappings are called things like `icd10_comorbid_ahrq`.
+```{r ahrq}
+#icd9_map_ahrq <- icd:::sas_parse_ahrq() # user doesn't need to do this
+names(icd9_map_ahrq)
+icd9_map_ahrq$CHF[1:5]
+icd10_map_ahrq$CHF[1:5]
+```
+
+### Quan
+Quan's paper looked at indices using both ICD-10 and ICD-9-CM. Quan generated updated ICD-9-CM codes for all 30 of Elixhauser and all 17 of Charlson/Deyo's comorbidities. Thus there are two 'Quan' comorbidity mappings.
+```{r quan elix}
+names(icd10_map_quan_deyo)
+names(icd10_map_quan_elix)
+```
+
+## Computing the comorbidities
+
+Let matrix A represent the comorbidities associated with each patient visit, where each row, m, is a patient visit, and each column, n, represents a different code. Each cell of the matrix is therefore either unity, indicating that the patient visit on row m is associated with the code on column n.
+
+$$A_{m,n} = 
+ \begin{pmatrix}
+  a_{1,1} & a_{1,2} & \cdots & a_{1,n} \\
+  a_{2,1} & a_{2,2} & \cdots & a_{2,n} \\
+  \vdots  & \vdots  & \ddots & \vdots  \\
+  a_{m,1} & a_{m,2} & \cdots & a_{m,n} 
+ \end{pmatrix}$$
+Let matrix B be the comorbidity map, where each row, n, represents a different code, and each column, p, represents a comorbidity.
+$$ B_{n,p} = 
+  \begin{pmatrix}
+  b_{1,1} & b_{1,2} & \cdots & b_{1,p} \\
+  b_{2,1} & b_{2,2} & \cdots & b_{2,p} \\
+  \vdots  & \vdots  & \ddots & \vdots  \\
+  b_{n,1} & b_{n,2} & \cdots & b_{n,p} 
+ \end{pmatrix}$$
+
+Then the comorbidities associated with each patient visit is the matrix product of these two.
+
+$$C_{m,p} = 
+A \cdot B = 
+  \begin{pmatrix}
+  c_{1,1} & c_{1,2} & \cdots & c_{1,p} \\
+  c_{2,1} & c_{2,2} & \cdots & c_{2,p} \\
+  \vdots  & \vdots  & \ddots & \vdots  \\
+  c_{m,1} & c_{m,2} & \cdots & c_{m,p} 
+ \end{pmatrix}$$
+
+Given there are tens or hundreds of thousands of possible ICD-9 or ICD-10 codes, the possible width of A is large (n columns). There are also many ICD codes for each comorbidity, so the height of B is large, although typical comorbidity maps only cover a subset of possible codes. Many data sets have tens of millions of patient visits, so the memory required (assuming one 32 bit word for each comorbidity - bit-wise storage is less efficient computationally and not supported by many linear algebra libraries), this could mean, using lower estimates, $10^7 \cdot 10^4 \cdot 4 = 4 \cdot 10^{11}$, or 100 gigabytes simply to represent the patient-visit to disease relationships. There are two major simplifications: firstly, only a small fraction of possible ICD codes typically appear in billing data-sets; secondly, sparse matrix algebra can be used to dramatically reduce the memory requirement by just storing co-ordinates, not the entire grid.
+
+Whatever reduction of unnecessary data is performed on the patient-visit matrix must also be performed on the comorbity map, since the columns of the patient-visit matrix must match the rows of the comorbidity map. This is accomplished in 'icd' by using a factor where the factor levels represent the intersection of the codes in the patient-visit data and all the codes in the comorbidity map. Thus the factor indices become row or column indices in matrices A and B respectively. Note that we only need to represent codes which are in _both_ the patient-visit dad and the comorbidity map, making matrix A narrower and matrix B shorter.
+
+## Worked example with ICD-10 codes
+
+Take four patient-visits with the following ICD-10 codes in wide format:
+
+| patient-visit | code1 | code2  | code3 |
+|---------------|-------|--------|-------|
+| Patient one   | K401  |        |       |   
+| Patient two   | I0981 | C450   |       |   
+| Patient three | M352  | I10    |       |   
+| Patient four  | I110  | H40001 | I10   |
+
+A simple comorbidity map is as follows:
+Rheumatic Heart Disease: I098
+Hypertension: I10, I11
+Heart failure: I50, I110
+
+There are several things to note, which represent common features in real healthcare data:
+ - there are patient-visit codes which do not appear in the comorbidity map
+ - there are codes in the comorbidity map which do not appear in the patient-visit codes
+ - "I11" appears in one comorbidities and its child code "I110" appears in another.
+ - Patient two has code "I0981", but only the parent code "I098" appears in the comorbidity map.
+
+In order to make this into a matrix algebra problem, all the patient-visit codes must be used to search for matching or parent ICD-10 codes in the comorbidity map. The same logic could be used for any complicated coding system in which addition of a digit or character denotes a relationship between a parent and child code. However, when there are a more limited number of possible codes, simply expanding out all the permutations into the comorbidity map avoids some computational expense, since fewer character-by-character comparisons have to be done. In 'icd' this is done for ICD-9 maps.
+
+Let A be a simplified set of patient-visits, where the columns represent the ICD-10 codes "I0981" (rheumatic heart failure), "I10" (essential hypertension), and "I110" (hypertensive heart disease with heart failure). Again, each row is a different patient-visit.
+
+Let B be a simplified comorbidity map, where the columns represent congestive heart failure and hypertension, in that order. Note that "I110" is found in both these comrobidities.
+$$A = 
+ \begin{pmatrix}
+  0 & 0 & 0 \\
+  1 & 0 & 0 \\
+  0 & 1 & 0 \\
+  0 & 1 & 1
+ \end{pmatrix}
+ \qquad
+B =
+ \begin{pmatrix}
+  1 & 0 & 0 \\
+  0 & 1 & 0 \\
+  0 & 1 & 1 
+ \end{pmatrix}
+ \qquad
+ C = A \cdot B = 
+ \begin{pmatrix}
+ 0 & 0 & 0 \\
+ 1 & 0 & 0 \\
+ 0 & 1 & 0 \\
+ 0 & 2 & 1 
+ \end{pmatrix}$$
+Note that cell $C_{4,2} = 2$, because the condition "I110" is in two comorbidities, so the final result can be given as a logical matrix $A \cdot B \neq 0$
+Thus, the final result is:
+
+$$(A \cdot B \neq 0) = 
+ \begin{pmatrix}
+ 0 & 0 & 0 \\
+ 1 & 0 & 0 \\
+ 0 & 1 & 0 \\
+ 0 & 1 & 1 
+ \end{pmatrix}$$
+
+This can be represented thus:
+
+| patient-visit | rheum | HTN | CHF |
+|---------------|-------|-----|-----|
+| Patient one   |       |     |     |
+| Patient two   | yes   |     |     |
+| Patient three |       | yes |     |
+| Patient four  |       | yes | yes |
+
+The Eigen linear algebra software has highly optimized multihtreaded code for some specific cases, including the type of matrix multiplication needed here, i.e. row-major sparse matrix multiplication with a dense matrix. It would be possible to use a more distributed matrix algebra approach using multiple CPUs on multiple servers, but even for large 10-100 million row data sets, the matrix muliplication is only a small fraction of the processing time.
+
+## Conclusion
+
+This package allows fluid, fast and accurate manipulation of ICD-9 and ICD-10 codes, especially when combined with [magrittr](https://cran.r-project.org/package=magrittr). Suggestions, contributions and comments are welcome via [github](https://github.com/jackwasey/icd/issues).
+
+## Acknolwedgements
+
+I am grateful to several people who have contributed code, notably the work on HCC (Anobel Odisho) and CCS (????). A full list of contributors may be seen on the ('icd')[https://cran.r-project.org/web/packages/icd/index.html] CRAN page, and on the (github project)[https://github.com/jackwasey/icd] page
