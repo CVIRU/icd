@@ -69,7 +69,7 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
     n = INTEGER(icds)[i]; // ICD codes are in a factor, so get the integer index
 
     if (lastVisit != visit) {
-#ifdef ICD_DEBUG_SETUP
+#ifdef ICD_DEBUG_SETUP_TRACE
       Rcpp::Rcout << "visit has changed" << std::endl;
 #endif
       vcdb_new_idx = vcdb_max_idx + 1;
@@ -85,7 +85,7 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
         visTriplets.push_back(Triplet(found->second, n - 1, true));
         continue; // and continue with next row
       } else { // otherwise we found a new visitId, so add it to our lookup table
-#ifdef ICD_DEBUG_SETUP
+#ifdef ICD_DEBUG_SETUP_TRACE
         Rcpp::Rcout << "visit is new" << std::endl;
 #endif
         VisLkPair vis_lookup_pair = std::make_pair(visit, vcdb_new_idx);
@@ -257,9 +257,18 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
     else
       Rcpp::Rcout << result << std::endl;
 #endif
-
+#ifdef ICD_DEBUG_SETUP
     Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic> result_bool = (result.array() != 0);
-    Rcpp::LogicalMatrix mat_out_bool = Rcpp::wrap(result);
+    Rcpp::Rcout << "Result boolean array has " <<
+      "rows: " << result_bool.rows() <<
+        " and cols: " << result_bool.cols() << std::endl;
+    Rcpp::Rcout << "bool result begins: " << std::endl;
+    if (result_bool.rows() >= 4 && result_bool.cols() >= 4)
+      Rcpp::Rcout << result_bool.block<4, 4>(0, 0) << std::endl;
+    else
+      Rcpp::Rcout << result_bool << std::endl;
+#endif
+Rcpp::LogicalMatrix mat_out_bool = Rcpp::wrap(result);
     //Rcpp::IntegerMatrix mat_out = Rcpp::wrap(result);
     List dimnames = Rcpp::List::create(out_row_names, icd9Mapping.names());
     CharacterVector rownames = dimnames[0];
