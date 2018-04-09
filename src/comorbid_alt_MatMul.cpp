@@ -49,7 +49,7 @@ void buildVisitCodesVecSparse(const SEXP& icd9df,
 
   VecVecIntSz vcdb_max_idx = -1; // we increment immediately to zero as first index
   VecVecIntSz vcdb_new_idx;
-  VecVecIntSz vcdb_last_idx;
+  VecVecIntSz vcdb_last_idx = 2094967295; // extremely unlikely random, < 2^32 (to avoid 32bit R build warn)
 
   visit_codes_sparse.resize(vlen, numUniqueCodes); // overestimate badly to start
   visit_codes_sparse.reserve(vlen); // but memory commitment is known and limited.
