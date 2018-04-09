@@ -205,7 +205,7 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
         map_lookup.insert(this_code_factor_number);
         ++row;
       } else {
-#ifdef ICD_DEBUG_SETUP
+#ifdef ICD_DEBUG_SETUP_TRACE
         Rcpp::Rcout << "found duplicate while building map" << std::endl;
 #endif
       }

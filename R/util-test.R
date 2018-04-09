@@ -287,7 +287,7 @@ generate_random_unordered_pts <- function(num_patients = 50000, dz_per_patient =
   set.seed(1441)
   pts <- round(n / np)
   data.frame(
-    visit_id = sample(seq(1, pts), replace = TRUE, size = n),
+    visit_id = as_char_no_warn(sample(seq(1, pts), replace = TRUE, size = n)),
     code = fun(n),
     poa = as.factor(
       sample(x = c("Y", "N", "n", "n", "y", "X", "E", "", NA),
