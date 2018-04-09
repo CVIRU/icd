@@ -233,6 +233,7 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
 
   // just for debugging, convert to dense to show contents:
     {
+      Rcpp::Rcout << "converting visit_codes_sparse to dense for debugging only (slow!):" << std::endl;
       Eigen::MatrixXi dense = Eigen::MatrixXi(visit_codes_sparse);
       Rcpp::Rcout << "visit_codes_sparse:" << std::endl;
       if (visit_codes_sparse.rows() >= 4 && visit_codes_sparse.cols() >= 4)
@@ -268,8 +269,9 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
     else
       Rcpp::Rcout << result_bool << std::endl;
 #endif
-Rcpp::LogicalMatrix mat_out_bool = Rcpp::wrap(result);
-    //Rcpp::IntegerMatrix mat_out = Rcpp::wrap(result);
+    // Rcpp::LogicalMatrix mat_out_bool = Rcpp::wrap(result); // segfaults sometimes
+    Rcpp::IntegerMatrix mat_out_int = Rcpp::wrap(result); // try to avoid the segfault
+    Rcpp::LogicalMatrix mat_out_bool = Rcpp::wrap(mat_out_int);
     List dimnames = Rcpp::List::create(out_row_names, icd9Mapping.names());
     CharacterVector rownames = dimnames[0];
     CharacterVector colnames = dimnames[1];

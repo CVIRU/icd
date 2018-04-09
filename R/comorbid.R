@@ -335,7 +335,7 @@ icd_comorbid_common <- function(x,
   # map. many rows are NA, because most are NOT in comorbidity maps:
 
   # but first keep track of the visits with no comorbidities in the given map
-  # visit_not_comorbid_orig <- unique(x[is.na(x[[icd_name]]), visit_name])
+  # using internal subset for speed
   visit_not_comorbid <- unique(
     .subset2(
       .subset(x, is.na(
