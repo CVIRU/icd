@@ -231,6 +231,7 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
   Rcpp::Rcout << "Built the sparse matrix, rows:" << visit_codes_sparse.rows() <<
     ", cols: " << visit_codes_sparse.cols() << std::endl;
 
+#ifdef ICD_DEBUG_SETUP_SLOW
   // just for debugging, convert to dense to show contents:
     {
       Rcpp::Rcout << "converting visit_codes_sparse to dense for debugging only (slow!):" << std::endl;
@@ -241,6 +242,7 @@ LogicalMatrix icd9Comorbid_alt_MatMul(const Rcpp::DataFrame& icd9df, const Rcpp:
       else
         Rcpp::Rcout << dense << std::endl;
     }
+#endif
 #endif
 
     if (visit_codes_sparse.cols() != map.rows())
